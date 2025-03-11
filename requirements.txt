@@ -13,3 +13,4 @@ seaborn
 nltk
 sentence-transformers>=2.2.2
 openai>=1.0.0
+reportlab>=3.6.0
