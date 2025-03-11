@@ -9,7 +9,12 @@ import uuid
 load_dotenv()
 
 # Create OpenAI client (new API style)
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Replace this:
+
+
+# With this:
+api_key = st.secrets["OPENAI_API_KEY"] if hasattr(st, "secrets") and "OPENAI_API_KEY" in st.secrets else os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
 
 class SupervisorMatcherChatbot:
     def __init__(self):

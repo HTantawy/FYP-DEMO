@@ -13,14 +13,30 @@ import re
 load_dotenv()
 
 # Database connection parameters
-DB_CONFIG = {
-    'dbname': os.getenv('POSTGRES_DATABASE'),
-    'user': os.getenv('POSTGRES_USER'),
-    'password': os.getenv('POSTGRES_PASSWORD'),
-    'host': os.getenv('POSTGRES_HOST'),
-    'port': os.getenv('POSTGRES_PORT', '5432'),
-    'sslmode': 'require'  # Required for Neon
-}
+# Replace this:
+
+
+# With this:
+if hasattr(st, "secrets") and "POSTGRES_DATABASE" in st.secrets:
+    # When deployed to Streamlit Cloud
+    DB_CONFIG = {
+        'dbname': st.secrets["POSTGRES_DATABASE"],
+        'user': st.secrets["POSTGRES_USER"],
+        'password': st.secrets["POSTGRES_PASSWORD"],
+        'host': st.secrets["POSTGRES_HOST"],
+        'port': st.secrets.get("POSTGRES_PORT", "5432"),
+        'sslmode': 'require'  # Required for Neon
+    }
+else:
+    # For local development
+    DB_CONFIG = {
+        'dbname': os.getenv('POSTGRES_DATABASE'),
+        'user': os.getenv('POSTGRES_USER'),
+        'password': os.getenv('POSTGRES_PASSWORD'),
+        'host': os.getenv('POSTGRES_HOST'),
+        'port': os.getenv('POSTGRES_PORT', '5432'),
+        'sslmode': 'require'  # Required for Neon
+    }
 
 
 def create_admin_user():
