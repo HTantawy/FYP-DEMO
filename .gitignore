@@ -158,4 +158,4 @@ node_modules/
 .pnp
 .pnp.js
 
-# Exclude any other sensitive information or large files as needed
+# Exclude any other sensitive information or large files as needed.env
