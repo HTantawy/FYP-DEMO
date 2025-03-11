@@ -5,6 +5,8 @@ from auth_app import DB_CONFIG, init_db
 
 def verify_database():
     """Verify database connection and table existence"""
+    conn = None  # Initialize conn to None before the try block
+    cur = None   # Initialize cur to None as well
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor()
@@ -29,6 +31,7 @@ def verify_database():
         init_db()
         
     finally:
-        if conn:
+        if cur:  # Check if cur exists before closing it
             cur.close()
+        if conn:  # Now this check is safe because conn is always defined
             conn.close()

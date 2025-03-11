@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from student_supervisor import AdvancedSupervisorMatcher, visualize_results, generate_report
 from supervisor_view import view_supervisor_profile
+from chat import display_chatbot_guidance  # New import for chatbot
 import json
 from datetime import datetime
 import plotly.graph_objects as go
@@ -10,6 +11,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
 from dotenv import load_dotenv
+from messaging import display_messages_tab
 
 # Load environment variables
 load_dotenv()
@@ -30,7 +32,7 @@ def load_matcher():
     return AdvancedSupervisorMatcher()
 
 def get_supervisors_from_db():
-    """Fetch supervisors from database"""
+    """Fetch supervisors from database (including their maximum capacity)"""
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -42,7 +44,8 @@ def get_supervisors_from_db():
                 sp.research_interests as interests,
                 sp.department,
                 sp.expertise,    
-                sp.preferred_projects as project_types   
+                sp.preferred_projects as project_types,
+                sp.max_capacity as max_capacity
             FROM users u
             JOIN supervisor_profiles sp ON u.id = sp.user_id
             WHERE u.user_type = 'supervisor'
@@ -171,7 +174,7 @@ def save_match_history(student_id, supervisor_id, match_data):
 
         cur.execute("""
             INSERT INTO matching_history 
-            (student_id, supervisor_id, final_score, research_alignment, methodology_match, technical_skills, domain_knowledge, project_type_match,matching_skills)
+            (student_id, supervisor_id, final_score, research_alignment, methodology_match, technical_skills, domain_knowledge, project_type_match, matching_skills)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             student_id,
@@ -195,79 +198,33 @@ def save_match_history(student_id, supervisor_id, match_data):
             cur.close()
             conn.close()
 
+# New function: Check if supervisor has available capacity.
+def check_supervisor_capacity(supervisor_id, max_capacity):
+    """
+    Check if the supervisor has reached their capacity.
+    Returns True if the number of active requests (pending or accepted) is less than max_capacity.
+    """
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT COUNT(*) 
+            FROM supervisor_requests
+            WHERE supervisor_id = %s 
+              AND status IN ('pending', 'accepted')
+        """, (supervisor_id,))
+        count = cur.fetchone()[0]
+        return count < max_capacity
+    except Exception as e:
+        st.error(f"Error checking supervisor capacity: {e}")
+        return False
+    finally:
+        if conn:
+            cur.close()
+            conn.close()
+
+# Single init_session_state definition for all session variables.
 def init_session_state():
-    """Initialize session state variables"""
-    if 'matching_results' not in st.session_state:
-        st.session_state.matching_results = None
-    if 'project_data' not in st.session_state:
-        st.session_state.project_data = None
-    if 'active_tab' not in st.session_state:
-        st.session_state.active_tab = 'search'
-def main():
-    if not st.session_state.get('authenticated', False):
-        st.error("Please login to access this page")
-        return
-    
-    init_session_state()
-    
-    #st.title(" Student dashboard")
-
-    # Original:
-# st.title(" Student dashboard")
-
-# Updated with custom wrapper:
-    st.markdown("""
-        <div style="background-color: #fff; 
-                    padding: 1rem; 
-                    border-radius: 8px; 
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-                    margin-bottom: 1rem;">
-            <h1 style="font-size: 2rem; 
-                    font-weight: 600; 
-                    color: #1E3D59; 
-                    margin: 0;">
-                Student Dashboard
-            </h1>
-        </div>
-    """, unsafe_allow_html=True)
-
-    
-    # Tab selection
-    tabs = ["Search Supervisors", "My Requests"]
-    st.session_state.active_tab = st.radio("", tabs, key="main_tabs")
-    
-    if st.session_state.active_tab == "Search Supervisors":
-        show_search_page()
-    else:
-        show_requests_page()
-    
-    # Sidebar content
-    with st.sidebar:
-        st.subheader("About")
-        st.write("""
-        This tool uses advanced Natural Language Processing and Machine Learning 
-        techniques to match students with potential research supervisors based on:
-        
-        - Research interests alignment
-        - Methodology compatibility
-        - Technical skill requirements
-        - Domain knowledge
-        """)
-        
-        st.subheader("How it works")
-        st.write("""
-        1. Enter your project details
-        2. Specify technical requirements
-        3. Choose research methodology
-        4. Get matched with potential supervisors
-        5. Review detailed matching scores
-        """)
-        
-        if st.button("Logout", key="sidebar_logout_button"):
-            st.session_state.clear()
-            st.rerun()
-def init_session_state():
-    """Initialize session state variables"""
     if 'project_data' not in st.session_state:
         st.session_state.project_data = [
             {
@@ -297,9 +254,83 @@ def init_session_state():
     if 'matching_results' not in st.session_state:
         st.session_state.matching_results = None
 
+def stylish_tab_navigation():
+    """Create a stylish tab navigation system"""
+    
+    # Define tabs and their icons
+    tabs = [
+        {"name": "Search Supervisors", "icon": "🔍"},
+        {"name": "My Requests", "icon": "📋"},
+        {"name": "Messages", "icon": "✉️"},
+        {"name": "Chatbot Guidance", "icon": "💬"}
+    ]
+    
+    # Get the current active tab or set default
+    if 'active_tab' not in st.session_state:
+        st.session_state.active_tab = "Search Supervisors"
+    
+    # Apply custom CSS
+    st.markdown("""
+    <style>
+        /* Custom tab styling */
+        div.stButton > button {
+            background-color: white;
+            border: none;
+            color: #718096;
+            padding: 0.75rem 0;
+            font-weight: 500;
+            border-radius: 0;
+            width: 100%;
+            text-align: center;
+        }
+        
+        div.stButton > button:hover {
+            background-color: #f8fafc;
+            color: #4051b5;
+        }
+        
+        div.stButton > button:focus:not(:active) {
+            border-color: transparent;
+            box-shadow: none;
+        }
+        
+        div.stButton > button[data-active="true"] {
+            border-bottom: 3px solid #4051b5;
+            color: #4051b5;
+            font-weight: 600;
+        }
+        
+        /* Tab container styling */
+        [data-testid="stHorizontalBlock"] {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 0;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Create a horizontal layout for tabs
+    cols = st.columns(len(tabs))
+    
+    # Display each tab
+    for i, tab in enumerate(tabs):
+        active_status = "true" if st.session_state.active_tab == tab["name"] else "false"
+        
+        if cols[i].button(
+            f"{tab['icon']} {tab['name']}", 
+            key=f"tab_{i}",
+            use_container_width=True,
+            args=(active_status,)
+        ):
+            st.session_state.active_tab = tab["name"]
+            st.rerun()
+    
+    return st.session_state.active_tab
+
 def show_search_page():
     """Show the supervisor search and matching page"""
-    # Initialize session state
     init_session_state()
     
     # Load matcher and supervisors
@@ -342,16 +373,16 @@ def show_search_page():
             background-color: #4F46E5 !important;
             color: white !important;
             border-radius: 0.5rem !important;
-            padding: 0.5rem 1rem !important;  /* Changed from 0.75rem 1.5rem */
-            font-weight: 500 !important;      /* Changed from 600 */
+            padding: 0.5rem 1rem !important;
+            font-weight: 500 !important;
             border: none !important;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
             transition: all 200ms ease-in-out !important;
-            font-size: 0.875rem !important;   /* Added */
-            width: auto !important;           /* Added */
-            min-width: 120px !important;      /* Added */
-            height: 38px !important;          /* Added */
-            line-height: 1.1 !important;      /* Added */
+            font-size: 0.875rem !important;
+            width: auto !important;
+            min-width: 120px !important;
+            height: 38px !important;
+            line-height: 1.1 !important;
         }
         
         .stButton > button:hover {
@@ -361,7 +392,6 @@ def show_search_page():
         </style>
     """, unsafe_allow_html=True)
 
-    # Main content
     st.title("Project Proposals")
     
     # Project tabs
@@ -432,13 +462,11 @@ def show_search_page():
                 key=f"method_{index}"
             )
             
-            # Submit button must be the last element in the form
             submitted = st.form_submit_button("Find Matching Supervisors")
             if submitted:
                 if not project_description:
                     st.error("Please provide a project description")
                 else:
-                    # Save project data
                     st.session_state.project_data[index] = {
                         'title': project_title,
                         'description': project_description,
@@ -447,7 +475,6 @@ def show_search_page():
                         'project_type': selected_project_type
                     }
                     
-                    # Prepare data for matching
                     student_data = {
                         'student_name': student_name,
                         'project_title': project_title,
@@ -460,13 +487,11 @@ def show_search_page():
                         'project_type': selected_project_type
                     }
                     
-                    # Get matches
                     matches = matcher.match_supervisors(student_data, supervisors)
                     st.session_state.matching_results = matches
                     st.session_state.active_project = index
                     st.rerun()
 
-    # Render project forms in tabs
     with tab1:
         create_project_form(0)
     
@@ -476,15 +501,12 @@ def show_search_page():
     with tab3:
         create_project_form(2)    
 
-    # Display results
     if st.session_state.matching_results:
         st.markdown(f"## Matching Results for Project {st.session_state.active_project + 1}")
         
-        # Visualization
         fig = create_match_visualization(st.session_state.matching_results)
         st.plotly_chart(fig, use_container_width=True)
         
-        # Detailed results
         st.write("### Top Matches")
         for i, match in enumerate(st.session_state.matching_results[:3], 1):
             st.write(f"### #{i} Match Score: {match['final_score']:.3f}")
@@ -533,37 +555,36 @@ def show_search_page():
                         
                         with col2:
                             if st.button("Request Supervision", key=f"request_{supervisor['id']}"):
-                                active_project = st.session_state.project_data[st.session_state.active_project]
-                                if save_supervisor_request(
-                                    st.session_state.user['id'],
-                                    supervisor['id'],
-                                    active_project,
-                                    match['final_score']
-                                ):
-                                    save_match_history(
+                                # Check supervisor capacity before saving the request
+                                if not check_supervisor_capacity(supervisor['id'], supervisor['max_capacity']):
+                                    st.error("Supervisor capacity is full. Please choose another supervisor.")
+                                else:
+                                    active_project = st.session_state.project_data[st.session_state.active_project]
+                                    if save_supervisor_request(
                                         st.session_state.user['id'],
                                         supervisor['id'],
-                                        match
-                                    )
-                                    st.success(f"Request sent to {supervisor['name']}!")
-                                else:
-                                    st.error("Failed to send request. Please try again.")
-
-
-
+                                        active_project,
+                                        match['final_score']
+                                    ):
+                                        save_match_history(
+                                            st.session_state.user['id'],
+                                            supervisor['id'],
+                                            match
+                                        )
+                                        st.success(f"Request sent to {supervisor['name']}!")
+                                    else:
+                                        st.error("Failed to send request. Please try again.")
 
 def show_requests_page():
     """Show the student's supervision requests"""
     st.subheader("My Supervision Requests")
     
-    # Get student's requests
     requests = get_student_requests(st.session_state.user['id'])
     
     if not requests:
         st.info("You haven't made any supervision requests yet.")
         return
     
-    # Display requests
     for request in requests:
         with st.expander(f"{request['project_title']} - {request['supervisor_name']}"):
             col1, col2 = st.columns([2, 1])
@@ -590,6 +611,114 @@ def show_requests_page():
                 st.write("**Submitted:**", request['created_at'].strftime("%Y-%m-%d %H:%M"))
                 if request['updated_at'] != request['created_at']:
                     st.write("**Last Updated:**", request['updated_at'].strftime("%Y-%m-%d %H:%M"))
+
+def main():
+    if not st.session_state.get('authenticated', False):
+        st.error("Please login to access this page")
+        return
+    
+    init_session_state()
+    
+    st.markdown("""
+        <div style="background-color: #fff; 
+                    padding: 1.5rem; 
+                    border-radius: 12px; 
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
+                    margin-bottom: 1.5rem;">
+            <h1 style="font-size: 2.2rem; 
+                    font-weight: 700; 
+                    color: #1E3D59; 
+                    margin: 0;">
+                Student Dashboard
+            </h1>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Use the stylish tab navigation
+    st.session_state.active_tab = stylish_tab_navigation()
+    
+    # Display the selected tab content
+    if st.session_state.active_tab == "Search Supervisors":
+        show_search_page()
+    elif st.session_state.active_tab == "My Requests":
+        show_requests_page()
+    elif st.session_state.active_tab == "Messages":  # Add new Messages tab condition
+        display_messages_tab(DB_CONFIG)    
+    else:  # Chatbot Guidance tab
+        display_chatbot_guidance()
+    
+    # Sidebar content
+    with st.sidebar:
+        st.markdown("""
+        <div style="
+            background-color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        ">
+            <h3 style="
+                color: #1E3D59;
+                font-size: 1.2rem;
+                margin-bottom: 0.8rem;
+                font-weight: 600;
+            ">About</h3>
+            <p style="
+                color: #4A5568;
+                font-size: 0.9rem;
+                line-height: 1.5;
+            ">
+                This tool uses advanced Natural Language Processing and Machine Learning 
+                techniques to match students with potential research supervisors based on:
+            </p>
+            <ul style="
+                color: #4A5568;
+                font-size: 0.9rem;
+                line-height: 1.5;
+                padding-left: 1.5rem;
+                margin-top: 0.5rem;
+            ">
+                <li>Research interests alignment</li>
+                <li>Methodology compatibility</li>
+                <li>Technical skill requirements</li>
+                <li>Domain knowledge</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style="
+            background-color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        ">
+            <h3 style="
+                color: #1E3D59;
+                font-size: 1.2rem;
+                margin-bottom: 0.8rem;
+                font-weight: 600;
+            ">How it works</h3>
+            <ol style="
+                color: #4A5568;
+                font-size: 0.9rem;
+                line-height: 1.5;
+                padding-left: 1.5rem;
+                margin-top: 0.5rem;
+            ">
+                <li>Enter your project details</li>
+                <li>Specify technical requirements</li>
+                <li>Choose research methodology</li>
+                <li>Get matched with potential supervisors</li>
+                <li>Review detailed matching scores</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Simple logout button
+        if st.button("Logout", key="sidebar_logout_button", use_container_width=True):
+            st.session_state.clear()
+            st.rerun()
 
 if __name__ == "__main__":
     main()

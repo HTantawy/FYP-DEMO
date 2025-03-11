@@ -373,7 +373,6 @@ def get_score_style(score):
 
 
 def show_student_allocations():
-    st.markdown('<h2 class="section-header">Student Allocations by Hussein tantawy</h2>', unsafe_allow_html=True)
     
     students = get_all_students_with_allocation()
     if students.empty:

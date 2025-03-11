@@ -6,6 +6,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta
 from auth_app import DB_CONFIG
+from messaging import display_messages_tab
 
 def get_supervisor_requests(supervisor_id):
     """Fetch all requests for a supervisor"""
@@ -409,7 +410,7 @@ def supervisor_dashboard():
     """, unsafe_allow_html=True)
     
     # Create tabs (this approach avoids extra blank bars)
-    tab_overview, tab_requests, tab_profile = st.tabs(["Overview", "Requests", "Profile"])
+    tab_overview, tab_requests, tab_messages,tab_profile = st.tabs(["Overview", "Requests", "Messages", "Profile"])
     
     # Overview Tab
     with tab_overview:
@@ -502,6 +503,9 @@ def supervisor_dashboard():
         # Get requests specific to this supervisor
         requests = get_supervisor_requests(supervisor_id)
         show_requests_section(requests)
+
+    with tab_messages:
+        display_messages_tab(DB_CONFIG)    
     
     # Profile Tab
     with tab_profile:
@@ -529,9 +533,6 @@ if __name__ == "__main__":
     supervisor_dashboard()
 
 
-
-
-
-
-
-
+        
+        
+       

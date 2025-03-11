@@ -186,6 +186,16 @@ def init_db():
     ADD COLUMN IF NOT EXISTS website_url TEXT,
     ADD COLUMN IF NOT EXISTS bio TEXT;
 """)
+        cur.execute("""
+    CREATE TABLE IF NOT EXISTS messages (
+            id SERIAL PRIMARY KEY,
+            sender_id INTEGER REFERENCES users(id),
+            receiver_id INTEGER REFERENCES users(id),
+            message_text TEXT NOT NULL,
+            is_read BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+""")
 
         conn.commit()
         print("Database initialized successfully!")
@@ -864,15 +874,15 @@ def supervisor_signup():
                     [
                         "Machine Learning", "Deep Learning", "Computer Vision", "NLP",
                         "Data Science", "Cybersecurity", "Software Engineering",
-                        "Industrial IoT", "Robotics", "Cloud Computing", "Sentiment Analysis", "Big Data Processing","AI for Healthcare","AI in Finance", "Quantum Computing"
+                        "Industrial IoT", "Robotics", "Cloud Computing", "Sentiment Analysis", "Big Data Processing","AI for Healthcare","AI in Finance", "Quantum Computing", "Human-Computer-Interaction","Software Engineering and Distributed Computing", "Medical Imaging", "Computational Intelligence", "Text Analysis", "Network Programming", "Algorithm Design", "Health Informatics", "Clinical Machine Learning", "Generative artificial intelligence", "Machine learning for code analysis"
                     ],
                     placeholder="Select expertise"
                 )
             with col1:
                 preferred_projects = st.multiselect(
             "Preferred Project Types",
-            ["Research-based", 
-             "Theoretical", "Industry-focused",
+            ["Research-Based", 
+             "Theoretical Research & Analysis", "Industry-focused",
               "Software Development", "Hardware/IoT",
              ],
             placeholder="Select the types of projects you're interested in supervising"
