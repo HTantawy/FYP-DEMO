@@ -1,7 +1,7 @@
 # main.py
 import streamlit as st
 from auth_app import login_page, signup_page, student_signup, supervisor_signup
-from app import main as student_main
+from app import student_main
 from supervisor_dashboard import supervisor_dashboard
 from database import verify_database
 from admin_dashboard import admin_dashboard

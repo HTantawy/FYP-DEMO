@@ -612,7 +612,7 @@ def show_requests_page():
                 if request['updated_at'] != request['created_at']:
                     st.write("**Last Updated:**", request['updated_at'].strftime("%Y-%m-%d %H:%M"))
 
-def main():
+def student_main():
     if not st.session_state.get('authenticated', False):
         st.error("Please login to access this page")
         return
@@ -721,4 +721,4 @@ def main():
             st.rerun()
 
 if __name__ == "__main__":
-    main()
+    student_main()

@@ -12,3 +12,4 @@ scikit-learn
 seaborn
 nltk
 sentence-transformers>=2.2.2
+openai>=1.0.0
