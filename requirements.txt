@@ -11,3 +11,4 @@ torch==2.1.2
 scikit-learn
 seaborn
 nltk
+sentence-transformers>=2.2.2
