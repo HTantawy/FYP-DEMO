@@ -653,7 +653,7 @@ def login_page():
         # Logo and title
         if svg_content:
             st.image(f"https://i.ibb.co/n8kvbRY/crested-wm-dubai-cmyk.jpg", width=80)
-        st.markdown('<h1 class="form-header">Welcome Back</h1>', unsafe_allow_html=True)
+        st.markdown('<h1 class="form-header">Student-Supervisor Matcher</h1>', unsafe_allow_html=True)
         
         # Login form
         with st.form("login_form"):

@@ -140,62 +140,6 @@ def create_sample_supervisors():
                 "contact_preferences": "Email with [SEC] in subject line",
                 "website_url": "https://cyber.bham.ac.uk/~patelk",
                 "bio": "Former cybersecurity consultant with experience protecting financial institutions. Certified ethical hacker and regular contributor to major security conferences."
-            },
-            {
-                "email": "mroberts@bham.ac.uk",
-                "password": "password123",
-                "full_name": "Prof. Maria Roberts",
-                "department": "Data Science",
-                "research_interests": "Big data analytics, time series prediction, and anomaly detection in financial datasets. My lab develops scalable algorithms for processing massive datasets with applications in fraud detection and algorithmic trading.",
-                "expertise": ["Data Science", "Big Data Processing", "Machine Learning", "Algorithm Design"],
-                "preferred_projects": ["Industry-focused", "Research-Based"],
-                "max_capacity": 4,
-                "office_hours": "Tuesday and Thursday, 11:00-13:00",
-                "contact_preferences": "Email or in-person during office hours",
-                "website_url": "https://datascience.bham.ac.uk/~robertsm",
-                "bio": "Leading researcher in financial data science with industry partnerships in the banking sector. Specializes in time series analysis and high-frequency trading algorithms."
-            },
-            {
-                "email": "adiallo@bham.ac.uk",
-                "password": "password123",
-                "full_name": "Dr. Aminata Diallo",
-                "department": "Healthcare AI",
-                "research_interests": "AI applications in medical imaging and clinical decision support. Currently developing deep learning models for early detection of diabetic retinopathy and lung cancer from CT scans with explainable AI components.",
-                "expertise": ["AI for Healthcare", "Medical Imaging", "Deep Learning", "Clinical Machine Learning"],
-                "preferred_projects": ["Research-Based", "Software Development"],
-                "max_capacity": 3,
-                "office_hours": "Wednesday, 10:00-16:00",
-                "contact_preferences": "Email with prior appointment for meetings",
-                "website_url": "https://healthai.bham.ac.uk/~dialloa",
-                "bio": "Medical doctor turned AI researcher with a focus on bringing machine learning tools to clinical practice. Works closely with the University Hospital for clinical validation."
-            },
-            {
-                "email": "dnguyen@bham.ac.uk",
-                "password": "password123",
-                "full_name": "Prof. David Nguyen",
-                "department": "Robotics and Automation",
-                "research_interests": "Robotic manipulation, reinforcement learning for robotic control, and human-robot interaction. My lab focuses on developing dexterous robotic hands capable of fine manipulation tasks through imitation learning.",
-                "expertise": ["Robotics", "Machine Learning", "Human-Computer-Interaction"],
-                "preferred_projects": ["Hardware/IoT", "Research-Based", "Software Development"],
-                "max_capacity": 5,
-                "office_hours": "Monday and Friday, 13:00-15:00",
-                "contact_preferences": "Email for appointments, lab visits welcome",
-                "website_url": "https://robotics.bham.ac.uk/~nguyend",
-                "bio": "Director of the Advanced Robotics Lab with industry experience at Boston Dynamics. Focuses on creating robots with human-like dexterity through machine learning."
-            },
-            {
-                "email": "soliver@bham.ac.uk",
-                "password": "password123",
-                "full_name": "Dr. Sarah Oliver",
-                "department": "Software Engineering",
-                "research_interests": "Software architecture for distributed systems, microservices optimization, and DevOps practices. Current research includes automated testing frameworks and continuous deployment methodologies for critical systems.",
-                "expertise": ["Software Engineering", "Software Engineering and Distributed Computing", "Cloud Computing"],
-                "preferred_projects": ["Software Development", "Industry-focused"],
-                "max_capacity": 4,
-                "office_hours": "Tuesday and Thursday, 14:00-16:00",
-                "contact_preferences": "Microsoft Teams or email",
-                "website_url": "https://se.bham.ac.uk/~olivers",
-                "bio": "Software architect with extensive industry background at AWS. Specializes in building resilient distributed systems and microservices architectures."
             }
         ]
         
@@ -417,54 +361,6 @@ def create_sample_students():
                         "technical_requirements": ["Python", "TensorFlow", "Deep Learning", "Computer Vision", " Data Analysis"],
                         "methodology": "Quantitative",
                         "project_type": ["Research-Based", "Software Development"]
-                    }
-                ]
-            },
-            {
-                "email": "asmith2@bham.ac.uk",
-                "password": "password123",
-                "full_name": "Alice Smith",
-                "course": "MSc Artificial Intelligence",
-                "year_of_study": 1,
-                "projects": [
-                    {
-                        "title": "Generating Medical Reports from X-ray Images Using Large Language Models",
-                        "description": "A project exploring the application of large language models to automatically generate preliminary medical reports from X-ray images. The system will combine computer vision techniques with NLP to create accurate, clinically relevant descriptions of medical images.",
-                        "technical_requirements": ["Python", "PyTorch", "NLP", "Computer Vision", "Medical Imaging"],
-                        "methodology": "Mixed Methods",
-                        "project_type": ["Research-Based", "Software Development"]
-                    }
-                ]
-            },
-            {
-                "email": "rtaylor@bham.ac.uk",
-                "password": "password123",
-                "full_name": "Ryan Taylor",
-                "course": "MSc Cybersecurity",
-                "year_of_study": 1,
-                "projects": [
-                    {
-                        "title": "Detecting Zero-Day Vulnerabilities with Machine Learning",
-                        "description": "This project will develop a machine learning approach to identify potential zero-day vulnerabilities in software code. Using both static and dynamic code analysis combined with supervised learning algorithms, the system aims to flag code patterns that may lead to security exploits.",
-                        "technical_requirements": ["Python", "Machine Learning", "Network Programming", "Cybersecurity"],
-                        "methodology": "Quantitative",
-                        "project_type": ["Research-Based", "Software Development"]
-                    }
-                ]
-            },
-            {
-                "email": "mpatel2@bham.ac.uk",
-                "password": "password123",
-                "full_name": "Mira Patel",
-                "course": "MSc Data Science",
-                "year_of_study": 1,
-                "projects": [
-                    {
-                        "title": "Predictive Analytics for Stock Market Trends Using Alternative Data",
-                        "description": "This project will investigate how alternative data sources like social media sentiment, satellite imagery, and web scraping can enhance traditional stock market prediction models. It will implement a hybrid approach combining traditional time series analysis with deep learning techniques.",
-                        "technical_requirements": ["Python", "Big Data Processing", "Machine Learning", "Data Science"],
-                        "methodology": "Quantitative",
-                        "project_type": ["Industry-focused", "Research-Based"]
                     }
                 ]
             }
