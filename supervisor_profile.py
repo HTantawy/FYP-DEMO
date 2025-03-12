@@ -4,21 +4,7 @@ from psycopg2.extras import RealDictCursor
 from datetime import datetime
 
 # New: Define inspect_database to help with debugging
-def inspect_database(db_config):
-    conn = None  # Initialize conn to ensure it exists in finally
-    try:
-        conn = psycopg2.connect(**db_config)
-        cur = conn.cursor()
-        # For example, get a count of supervisors
-        cur.execute("SELECT COUNT(*) FROM users WHERE user_type='supervisor';")
-        count = cur.fetchone()[0]
-        print(f"Inspect Database: {count} supervisors found.")
-        cur.close()
-    except Exception as e:
-        print(f"Error inspecting database: {e}")
-    finally:
-        if conn is not None:
-            conn.close()
+
 
 def get_supervisor_profile(supervisor_id, db_config):
     """Fetch supervisor's complete profile"""
