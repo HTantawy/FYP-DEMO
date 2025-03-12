@@ -3,6 +3,34 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
 
+def inspect_database():
+    """Inspect the supervisor profiles for troubleshooting"""
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor()
+        
+        # Get all supervisor profiles to check expertise and preferred projects
+        cur.execute("""
+            SELECT u.email, sp.expertise, sp.preferred_projects 
+            FROM users u
+            JOIN supervisor_profiles sp ON u.id = sp.user_id
+            WHERE u.user_type = 'supervisor'
+        """)
+        
+        rows = cur.fetchall()
+        for row in rows:
+            print(f"Supervisor {row[0]}:")
+            print(f"  expertise: {row[1]}")
+            print(f"  preferred_projects: {row[2]}")
+            print()
+        
+    except Exception as e:
+        print(f"Error inspecting database: {e}")
+    finally:
+        if conn:
+            cur.close()
+            conn.close()
+
 def get_supervisor_profile(supervisor_id, db_config):
     """Fetch supervisor's complete profile"""
     try:
@@ -199,6 +227,9 @@ def render_profile_page(db_config):
         st.error("Please login as a supervisor to access this page")
         return
     
+    # Debug database content
+    inspect_database()
+    
     st.title("Profile Management")
     
     # Get current profile data
@@ -252,14 +283,24 @@ def render_profile_page(db_config):
         
         col1, col2 = st.columns(2)
         with col1:
-            # Get existing expertise values from profile
-            existing_expertise = profile_data['profile'].get('expertise', []) or []
-            
-            # Make sure existing values are all strings
-            existing_expertise = [str(item) for item in existing_expertise]
-            
-            # Define comprehensive list of standard expertise options
-            standard_expertise = [
+            # For expertise:
+            existing_expertise = []
+            try:
+                raw_expertise = profile_data['profile'].get('expertise', [])
+                if raw_expertise:
+                    if isinstance(raw_expertise, list):
+                        existing_expertise = [str(item) for item in raw_expertise]
+                    else:
+                        existing_expertise = [str(raw_expertise)]
+            except Exception as e:
+                print(f"Error processing expertise: {e}")
+                existing_expertise = []
+
+            print(f"Raw expertise from database: {profile_data['profile'].get('expertise', [])}")
+            print(f"Processed existing_expertise: {existing_expertise}")
+
+            # Define all possible expertise options
+            all_expertise_options = [
                 "Machine Learning", "Deep Learning", "Computer Vision", "NLP",
                 "Data Science", "Cybersecurity", "Software Engineering",
                 "Industrial IoT", "Robotics", "Cloud Computing", "Sentiment Analysis", 
@@ -270,45 +311,73 @@ def render_profile_page(db_config):
                 "Generative artificial intelligence", "Machine learning for code analysis",
                 "Quantum Computing", "AI in Finance", "Pattern Recognition", "Transformers"
             ]
-            
-            # Combine both lists and ensure existing values are in options
-            all_expertise_options = sorted(list(set(standard_expertise + existing_expertise)))
-            
-            # Debug print to console
-            print(f"Existing expertise: {existing_expertise}")
-            print(f"Available options: {all_expertise_options}")
-            
-            expertise = st.multiselect(
-                "Areas of Expertise",
-                options=all_expertise_options,
-                default=existing_expertise
-            )
+
+            # Add all existing expertise to the options
+            for item in existing_expertise:
+                if item and item not in all_expertise_options:
+                    all_expertise_options.append(item)
+
+            # For expertise:
+            try:
+                # Filter out any empty values and ensure everything is in the options list
+                safe_expertise = [item for item in existing_expertise if item and item in all_expertise_options]
+                expertise = st.multiselect(
+                    "Areas of Expertise",
+                    options=all_expertise_options,
+                    default=safe_expertise
+                )
+            except Exception as e:
+                print(f"Error displaying expertise multiselect: {e}")
+                expertise = st.multiselect(
+                    "Areas of Expertise",
+                    options=all_expertise_options,
+                    default=[]
+                )
         
         with col2:
-            # Get existing project types from profile
-            existing_projects = profile_data['profile'].get('preferred_projects', []) or []
-            
-            # Make sure existing values are all strings
-            existing_projects = [str(item) for item in existing_projects]
-            
-            # Define standard project type options
-            standard_projects = [
+            # Similarly for project types:
+            existing_projects = []
+            try:
+                raw_projects = profile_data['profile'].get('preferred_projects', [])
+                if raw_projects:
+                    if isinstance(raw_projects, list):
+                        existing_projects = [str(item) for item in raw_projects]
+                    else:
+                        existing_projects = [str(raw_projects)]
+            except Exception as e:
+                print(f"Error processing preferred projects: {e}")
+                existing_projects = []
+
+            print(f"Raw projects from database: {profile_data['profile'].get('preferred_projects', [])}")
+            print(f"Processed existing_projects: {existing_projects}")
+
+            # Define all possible project options
+            all_project_options = [
                 "Research-Based", "Research-based", "Theoretical", "Theoretical Research & Analysis",
                 "Industry-focused", "Software Development", "Hardware/IoT"
             ]
-            
-            # Combine both lists and ensure existing values are in options
-            all_project_options = sorted(list(set(standard_projects + existing_projects)))
-            
-            # Debug print to console
-            print(f"Existing projects: {existing_projects}")
-            print(f"Available options: {all_project_options}")
-            
-            preferred_projects = st.multiselect(
-                "Preferred Project Types",
-                options=all_project_options,
-                default=existing_projects
-            )
+
+            # Add all existing project types to the options
+            for item in existing_projects:
+                if item and item not in all_project_options:
+                    all_project_options.append(item)
+
+            # For projects:
+            try:
+                # Filter out any empty values and ensure everything is in the options list
+                safe_projects = [item for item in existing_projects if item and item in all_project_options]
+                preferred_projects = st.multiselect(
+                    "Preferred Project Types",
+                    options=all_project_options,
+                    default=safe_projects
+                )
+            except Exception as e:
+                print(f"Error displaying projects multiselect: {e}")
+                preferred_projects = st.multiselect(
+                    "Preferred Project Types",
+                    options=all_project_options,
+                    default=[]
+                )
         
         if st.button("Update Profile", type="primary"):
             updated_data = {
