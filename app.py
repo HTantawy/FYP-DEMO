@@ -443,7 +443,7 @@ def show_search_page():
                     'Data Mining', 'NLP', 'Computer Vision', 'Blockchain', 'Cloud Computing',
                     'TensorFlow', 'PyTorch', 'Scikit-learn', 'Robotics', 'JavaScript',
                     'Transformers', 'IoT', 'Web Development', 'Mobile App Development',
-                    'Database Systems', 'Node.js', 'Kotlin'
+                    'Database Systems', 'Node.js', 'Kotlin', 'Data Analysis', 'Reinforcement Learning', 'Game Development','Java','Neural Networks', 'Speech Recognition'
                 ]
                 
                 selected_tech = st.multiselect(

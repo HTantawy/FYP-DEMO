@@ -5,6 +5,7 @@ from app import student_main
 from supervisor_dashboard import supervisor_dashboard
 from database import verify_database
 from admin_dashboard import admin_dashboard
+from database import clean_duplicate_data
 
 def initialize_session_state():
     if 'authenticated' not in st.session_state:
@@ -19,6 +20,7 @@ def initialize_session_state():
 def main():
     st.set_page_config(page_title="Research Supervisor Matcher", layout="wide")
     
+    clean_duplicate_data()
     initialize_session_state()
     
     if not st.session_state.authenticated:

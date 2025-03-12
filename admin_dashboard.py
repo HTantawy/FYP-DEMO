@@ -121,7 +121,7 @@ def admin_dashboard():
             padding: 1rem;
             border-radius: 8px;
             margin-bottom: 1rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: none;
         }
         
         /* For card-based layout in Student Allocations tab */
@@ -380,13 +380,13 @@ def show_student_allocations():
         return
         
     # Enhanced filters section
-    st.markdown('<div class="search-box">', unsafe_allow_html=True)
+    
     col1, col2 = st.columns([2, 1])
     with col1:
         search_term = st.text_input("🔍 Search by name or course...")
     with col2:
         status_filter = st.selectbox("All Students", ["All", "Allocated", "Unallocated"], index=0)
-    st.markdown('</div>', unsafe_allow_html=True)
+    
 
     # Apply filters
     filtered_students = students

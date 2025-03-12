@@ -101,10 +101,24 @@ def update_supervisor_profile(supervisor_id, profile_data, db_config):
             conn.close()
 
 def add_publication(supervisor_id, pub_data, db_config):
-    """Add a new publication"""
+    """Add a new publication with duplicate checking"""
     try:
         conn = psycopg2.connect(**db_config)
         cur = conn.cursor()
+        
+        # Check if publication already exists
+        cur.execute("""
+            SELECT id FROM supervisor_publications
+            WHERE supervisor_id = %s AND title = %s AND year = %s
+        """, (
+            supervisor_id,
+            pub_data['title'],
+            pub_data['year']
+        ))
+        
+        existing_pub = cur.fetchone()
+        if existing_pub:
+            return False
         
         cur.execute("""
             INSERT INTO supervisor_publications
@@ -133,11 +147,27 @@ def add_publication(supervisor_id, pub_data, db_config):
             conn.close()
 
 def add_supervised_project(supervisor_id, project_data, db_config):
-    """Add a supervised project"""
+    """Add a supervised project with duplicate checking"""
     try:
         conn = psycopg2.connect(**db_config)
         cur = conn.cursor()
         
+        # First check if this project already exists for this supervisor
+        cur.execute("""
+            SELECT id FROM supervised_projects
+            WHERE supervisor_id = %s AND title = %s AND year = %s AND student_name = %s
+        """, (
+            supervisor_id,
+            project_data['title'],
+            project_data['year'],
+            project_data['student_name']
+        ))
+        
+        existing_project = cur.fetchone()
+        if existing_project:
+            return False
+        
+        # If no duplicate, insert the new project
         cur.execute("""
             INSERT INTO supervised_projects
             (supervisor_id, title, student_name, year, project_type, description, outcome)
@@ -217,25 +247,48 @@ def render_profile_page(db_config):
         
         col1, col2 = st.columns(2)
         with col1:
+            # Get existing expertise values from profile
+            existing_expertise = profile_data['profile'].get('expertise', [])
+            
+            # Define comprehensive list of standard expertise options
+            standard_expertise = [
+                "Machine Learning", "Deep Learning", "Computer Vision", "NLP",
+                "Data Science", "Cybersecurity", "Software Engineering",
+                "Industrial IoT", "Robotics", "Cloud Computing", "Sentiment Analysis", 
+                "Big Data Processing", "Text Analysis", "Network Programming", 
+                "Algorithm Design", "Software Engineering and Distributed Computing", 
+                "AI for Healthcare", "Medical Imaging", "Human-Computer-Interaction", 
+                "Computational Intelligence", "Health Informatics", "Clinical Machine Learning",
+                "Generative artificial intelligence", "Machine learning for code analysis",
+                "Quantum Computing", "AI in Finance", "Pattern Recognition", "Transformers"
+            ]
+            
+            # Combine both lists and ensure existing values are in options
+            all_expertise_options = sorted(list(set(standard_expertise + existing_expertise)))
+            
             expertise = st.multiselect(
                 "Areas of Expertise",
-                [
-                 "Machine Learning", "Deep Learning", "Computer Vision", "NLP",
-                "Data Science", "Cybersecurity", "Software Engineering",
-                "Industrial IoT", "Robotics", "Cloud Computing", "Sentiment Analysis", "Big Data Processing"
-                ],
-                default=profile_data['profile'].get('expertise', [])
+                options=all_expertise_options,
+                default=existing_expertise
             )
         
         with col2:
+            # Get existing project types from profile
+            existing_projects = profile_data['profile'].get('preferred_projects', [])
+            
+            # Define standard project type options
+            standard_projects = [
+                "Research-Based", "Research-based", "Theoretical", 
+                "Industry-focused", "Software Development", "Hardware/IoT"
+            ]
+            
+            # Combine both lists and ensure existing values are in options
+            all_project_options = sorted(list(set(standard_projects + existing_projects)))
+            
             preferred_projects = st.multiselect(
                 "Preferred Project Types",
-                [
-                  "Research-based", 
-                  "Theoretical", "Industry-focused",
-                  "Software Development", "Hardware/IoT",
-                ],
-                default=profile_data['profile'].get('preferred_projects', [])
+                options=all_project_options,
+                default=existing_projects
             )
         
         if st.button("Update Profile", type="primary"):
