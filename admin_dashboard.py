@@ -43,7 +43,7 @@ def admin_dashboard():
         .stat-number {
             font-size: 2rem;
             font-weight: bold;
-            color: #2E5073;
+            color: #4F46E5;
         }
         .stat-label {
             font-size: 1rem;

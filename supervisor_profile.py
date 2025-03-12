@@ -206,6 +206,11 @@ def render_profile_page(db_config):
     if not profile_data:
         st.error("Error loading profile data")
         return
+        
+    # Safety check to ensure profile data has expected structure
+    if 'profile' not in profile_data or profile_data['profile'] is None:
+        st.error("Profile data format is incorrect or missing")
+        return
     
     tab1, tab2, tab3 = st.tabs(["Basic Information", "Publications", "Supervised Projects"])
     
@@ -247,10 +252,11 @@ def render_profile_page(db_config):
         
         col1, col2 = st.columns(2)
         with col1:
-            # Get existing expertise values from profile and ensure it's a list
-            existing_expertise = profile_data['profile'].get('expertise', [])
-            if not isinstance(existing_expertise, list):
-                existing_expertise = [existing_expertise] if existing_expertise else []
+            # Get existing expertise values from profile
+            existing_expertise = profile_data['profile'].get('expertise', []) or []
+            
+            # Make sure existing values are all strings
+            existing_expertise = [str(item) for item in existing_expertise]
             
             # Define comprehensive list of standard expertise options
             standard_expertise = [
@@ -267,34 +273,41 @@ def render_profile_page(db_config):
             
             # Combine both lists and ensure existing values are in options
             all_expertise_options = sorted(list(set(standard_expertise + existing_expertise)))
-            default_expertise = [exp for exp in existing_expertise if exp in all_expertise_options]
+            
+            # Debug print to console
+            print(f"Existing expertise: {existing_expertise}")
+            print(f"Available options: {all_expertise_options}")
             
             expertise = st.multiselect(
                 "Areas of Expertise",
                 options=all_expertise_options,
-                default=default_expertise
+                default=existing_expertise
             )
         
         with col2:
-            # Get existing project types from profile and ensure it's a list
-            existing_projects = profile_data['profile'].get('preferred_projects', [])
-            if not isinstance(existing_projects, list):
-                existing_projects = [existing_projects] if existing_projects else []
+            # Get existing project types from profile
+            existing_projects = profile_data['profile'].get('preferred_projects', []) or []
+            
+            # Make sure existing values are all strings
+            existing_projects = [str(item) for item in existing_projects]
             
             # Define standard project type options
             standard_projects = [
-                "Research-Based", "Research-based", "Theoretical", 
+                "Research-Based", "Research-based", "Theoretical", "Theoretical Research & Analysis",
                 "Industry-focused", "Software Development", "Hardware/IoT"
             ]
             
             # Combine both lists and ensure existing values are in options
             all_project_options = sorted(list(set(standard_projects + existing_projects)))
-            default_projects = [proj for proj in existing_projects if proj in all_project_options]
+            
+            # Debug print to console
+            print(f"Existing projects: {existing_projects}")
+            print(f"Available options: {all_project_options}")
             
             preferred_projects = st.multiselect(
                 "Preferred Project Types",
                 options=all_project_options,
-                default=default_projects
+                default=existing_projects
             )
         
         if st.button("Update Profile", type="primary"):
