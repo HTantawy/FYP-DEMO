@@ -247,8 +247,10 @@ def render_profile_page(db_config):
         
         col1, col2 = st.columns(2)
         with col1:
-            # Get existing expertise values from profile
+            # Get existing expertise values from profile and ensure it's a list
             existing_expertise = profile_data['profile'].get('expertise', [])
+            if not isinstance(existing_expertise, list):
+                existing_expertise = [existing_expertise] if existing_expertise else []
             
             # Define comprehensive list of standard expertise options
             standard_expertise = [
@@ -265,16 +267,19 @@ def render_profile_page(db_config):
             
             # Combine both lists and ensure existing values are in options
             all_expertise_options = sorted(list(set(standard_expertise + existing_expertise)))
+            default_expertise = [exp for exp in existing_expertise if exp in all_expertise_options]
             
             expertise = st.multiselect(
                 "Areas of Expertise",
                 options=all_expertise_options,
-                default=existing_expertise
+                default=default_expertise
             )
         
         with col2:
-            # Get existing project types from profile
+            # Get existing project types from profile and ensure it's a list
             existing_projects = profile_data['profile'].get('preferred_projects', [])
+            if not isinstance(existing_projects, list):
+                existing_projects = [existing_projects] if existing_projects else []
             
             # Define standard project type options
             standard_projects = [
@@ -284,11 +289,12 @@ def render_profile_page(db_config):
             
             # Combine both lists and ensure existing values are in options
             all_project_options = sorted(list(set(standard_projects + existing_projects)))
+            default_projects = [proj for proj in existing_projects if proj in all_project_options]
             
             preferred_projects = st.multiselect(
                 "Preferred Project Types",
                 options=all_project_options,
-                default=existing_projects
+                default=default_projects
             )
         
         if st.button("Update Profile", type="primary"):
