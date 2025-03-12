@@ -107,7 +107,7 @@ def create_sample_supervisors():
                 "research_interests": "Deep Learning and Computer Vision research with a focus on object detection and image segmentation in autonomous vehicles. Currently developing novel neural network architectures for real-time pedestrian tracking in adverse weather conditions.",
                 "expertise": ["Deep Learning", "Computer Vision", "Machine Learning"],
                 "preferred_projects": ["Research-Based", "Industry-focused", "Software Development"],
-                "max_capacity": 4,
+                "max_capacity": 10,
                 "office_hours": "Tuesday and Thursday, 14:00-16:00",
                 "contact_preferences": "Email or MS Teams",
                 "website_url": "https://cs.bham.ac.uk/~smithj",
@@ -140,6 +140,48 @@ def create_sample_supervisors():
                 "contact_preferences": "Email with [SEC] in subject line",
                 "website_url": "https://cyber.bham.ac.uk/~patelk",
                 "bio": "Former cybersecurity consultant with experience protecting financial institutions. Certified ethical hacker and regular contributor to major security conferences."
+            },
+            {
+                "email": "dnguyen@bham.ac.uk",
+                "password": "password123",
+                "full_name": "Prof. David Nguyen",
+                "department": "Robotics and Automation",
+                "research_interests": "Robotic manipulation, reinforcement learning for robotic control, and human-robot interaction. My lab focuses on developing dexterous robotic hands capable of fine manipulation tasks through imitation learning.",
+                "expertise": ["Robotics", "Machine Learning", "Human-Computer-Interaction"],
+                "preferred_projects": ["Hardware/IoT", "Research-Based", "Software Development"],
+                "max_capacity": 9,
+                "office_hours": "Monday and Friday, 13:00-15:00",
+                "contact_preferences": "Email for appointments, lab visits welcome",
+                "website_url": "https://robotics.bham.ac.uk/~nguyend",
+                "bio": "Director of the Advanced Robotics Lab with industry experience at Boston Dynamics. Focuses on creating robots with human-like dexterity through machine learning."
+            },
+            {
+                "email": "soliver@bham.ac.uk",
+                "password": "password123",
+                "full_name": "Dr. Sarah Oliver",
+                "department": "Software Engineering",
+                "research_interests": "Software architecture for distributed systems, microservices optimization, and DevOps practices. Current research includes automated testing frameworks and continuous deployment methodologies for critical systems.",
+                "expertise": ["Software Engineering", "Software Engineering and Distributed Computing", "Cloud Computing"],
+                "preferred_projects": ["Software Development", "Industry-focused"],
+                "max_capacity": 6,
+                "office_hours": "Tuesday and Thursday, 14:00-16:00",
+                "contact_preferences": "Microsoft Teams or email",
+                "website_url": "https://se.bham.ac.uk/~olivers",
+                "bio": "Software architect with extensive industry background at AWS. Specializes in building resilient distributed systems and microservices architectures."
+            },
+            {
+                "email": "adiallo@bham.ac.uk",
+                "password": "password123",
+                "full_name": "Dr. Aminata Diallo",
+                "department": "Healthcare AI",
+                "research_interests": "AI applications in medical imaging and clinical decision support. Currently developing deep learning models for early detection of diabetic retinopathy and lung cancer from CT scans with explainable AI components.",
+                "expertise": ["AI for Healthcare", "Medical Imaging", "Deep Learning", "Clinical Machine Learning"],
+                "preferred_projects": ["Research-Based", "Software Development"],
+                "max_capacity": 3,
+                "office_hours": "Wednesday, 10:00-16:00",
+                "contact_preferences": "Email with prior appointment for meetings",
+                "website_url": "https://healthai.bham.ac.uk/~dialloa",
+                "bio": "Medical doctor turned AI researcher with a focus on bringing machine learning tools to clinical practice. Works closely with the University Hospital for clinical validation."
             }
         ]
         
@@ -361,6 +403,38 @@ def create_sample_students():
                         "technical_requirements": ["Python", "TensorFlow", "Deep Learning", "Computer Vision", " Data Analysis"],
                         "methodology": "Quantitative",
                         "project_type": ["Research-Based", "Software Development"]
+                    }
+                ]
+            },
+            {
+                "email": "mohamedelsayed2@bham.ac.uk",
+                "password": "password123",
+                "full_name": "Mohamed Moustafa",
+                "course": "MSc Artificial Intelligence",
+                "year_of_study": 1,
+                "projects": [
+                    {
+                        "title": "Generating Medical Reports from X-ray Images Using Large Language Models",
+                        "description": "A project exploring the application of large language models to automatically generate preliminary medical reports from X-ray images. The system will combine computer vision techniques with NLP to create accurate, clinically relevant descriptions of medical images.",
+                        "technical_requirements": ["Python", "PyTorch", "NLP", "Computer Vision", "Medical Imaging"],
+                        "methodology": "Mixed Methods",
+                        "project_type": ["Research-Based", "Software Development"]
+                    }
+                ]
+            },
+            {
+                "email": "ahmed_12@bham.ac.uk",
+                "password": "password123",
+                "full_name": "Ahmed Badawy",
+                "course": "MSc Data Science",
+                "year_of_study": 1,
+                "projects": [
+                    {
+                        "title": "Predictive Analytics for Stock Market Trends Using Alternative Data",
+                        "description": "This project will investigate how alternative data sources like social media sentiment, satellite imagery, and web scraping can enhance traditional stock market prediction models. It will implement a hybrid approach combining traditional time series analysis with deep learning techniques.",
+                        "technical_requirements": ["Python", "Big Data Processing", "Machine Learning", "Data Science"],
+                        "methodology": "Quantitative",
+                        "project_type": ["Industry-focused", "Research-Based"]
                     }
                 ]
             }
