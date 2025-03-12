@@ -3,6 +3,23 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
 
+# New: Define inspect_database to help with debugging
+def inspect_database(db_config):
+    conn = None  # Initialize conn to ensure it exists in finally
+    try:
+        conn = psycopg2.connect(**db_config)
+        cur = conn.cursor()
+        # For example, get a count of supervisors
+        cur.execute("SELECT COUNT(*) FROM users WHERE user_type='supervisor';")
+        count = cur.fetchone()[0]
+        print(f"Inspect Database: {count} supervisors found.")
+        cur.close()
+    except Exception as e:
+        print(f"Error inspecting database: {e}")
+    finally:
+        if conn is not None:
+            conn.close()
+
 def get_supervisor_profile(supervisor_id, db_config):
     """Fetch supervisor's complete profile"""
     try:
@@ -199,6 +216,9 @@ def render_profile_page(db_config):
         st.error("Please login as a supervisor to access this page")
         return
     
+    # Call the debug function with proper db_config
+    inspect_database(db_config)
+    
     st.title("Profile Management")
     
     # Get current profile data
@@ -247,8 +267,11 @@ def render_profile_page(db_config):
         
         col1, col2 = st.columns(2)
         with col1:
-            # Get existing expertise values from profile
+            # Get existing expertise values from profile and ensure it's a list, filtering out empty values
             existing_expertise = profile_data['profile'].get('expertise', [])
+            if not isinstance(existing_expertise, list):
+                existing_expertise = [existing_expertise] if existing_expertise else []
+            existing_expertise = [exp for exp in existing_expertise if exp]
             
             # Define comprehensive list of standard expertise options
             standard_expertise = [
@@ -265,16 +288,20 @@ def render_profile_page(db_config):
             
             # Combine both lists and ensure existing values are in options
             all_expertise_options = sorted(list(set(standard_expertise + existing_expertise)))
+            default_expertise = [exp for exp in existing_expertise if exp in all_expertise_options]
             
             expertise = st.multiselect(
                 "Areas of Expertise",
                 options=all_expertise_options,
-                default=existing_expertise
+                default=default_expertise
             )
         
         with col2:
-            # Get existing project types from profile
+            # Get existing project types from profile and ensure it's a list, filtering out empty values
             existing_projects = profile_data['profile'].get('preferred_projects', [])
+            if not isinstance(existing_projects, list):
+                existing_projects = [existing_projects] if existing_projects else []
+            existing_projects = [proj for proj in existing_projects if proj]
             
             # Define standard project type options
             standard_projects = [
@@ -284,11 +311,12 @@ def render_profile_page(db_config):
             
             # Combine both lists and ensure existing values are in options
             all_project_options = sorted(list(set(standard_projects + existing_projects)))
+            default_projects = [proj for proj in existing_projects if proj in all_project_options]
             
             preferred_projects = st.multiselect(
                 "Preferred Project Types",
                 options=all_project_options,
-                default=existing_projects
+                default=default_projects
             )
         
         if st.button("Update Profile", type="primary"):
@@ -365,9 +393,9 @@ def render_profile_page(db_config):
             with col1:
                 student_name = st.text_input("Student Name")
                 year = st.number_input("Year", 
-                                     min_value=1900, 
-                                     max_value=datetime.now().year,
-                                     key="project_year")
+                                         min_value=1900, 
+                                         max_value=datetime.now().year,
+                                         key="project_year")
             
             with col2:
                 project_type = st.selectbox(
@@ -405,3 +433,4 @@ def render_profile_page(db_config):
 if __name__ == "__main__":
     from auth_app import DB_CONFIG
     render_profile_page(DB_CONFIG)
+
