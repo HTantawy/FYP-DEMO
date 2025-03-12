@@ -3,7 +3,6 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
 
-# New: Define inspect_database to help with debugging
 
 
 def get_supervisor_profile(supervisor_id, db_config):
@@ -202,8 +201,7 @@ def render_profile_page(db_config):
         st.error("Please login as a supervisor to access this page")
         return
     
-    # Call the debug function with proper db_config
-    inspect_database(db_config)
+    
     
     st.title("Profile Management")
     
