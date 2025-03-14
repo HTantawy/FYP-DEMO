@@ -1,9 +1,9 @@
-# database.py
+
 import psycopg2
 import streamlit as st
 from auth_app import DB_CONFIG, init_db
 
-# database.py
+
 import psycopg2
 import streamlit as st
 from auth_app import DB_CONFIG, init_db
@@ -66,7 +66,7 @@ def verify_database():
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor()
         
-        # Check if tables exist
+        
         cur.execute("""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables 
@@ -86,9 +86,9 @@ def verify_database():
         init_db()
         
     finally:
-        if cur:  # Check if cur exists before closing it
+        if cur:  
             cur.close()
-        if conn:  # Now this check is safe because conn is always defined
+        if conn:  
             conn.close()
 
 def create_sample_supervisors():
@@ -187,7 +187,7 @@ def create_sample_supervisors():
         
         print("Creating sample supervisors...")
         for supervisor in sample_supervisors:
-            # Check if supervisor exists
+            
             cur.execute("SELECT id FROM users WHERE email = %s", (supervisor['email'],))
             if not cur.fetchone():
                 # Hash password
@@ -222,8 +222,8 @@ def create_sample_supervisors():
                     supervisor.get('bio', '')
                 ))
                 
-                # Generate diverse publications based on expertise
-                for i in range(3):  # 3 publications per supervisor
+                
+                for i in range(3):  
                     year = 2023 - i
                     expertise = supervisor['expertise'][i % len(supervisor['expertise'])]
                     
@@ -259,12 +259,12 @@ def create_sample_supervisors():
                         f"10.1000/j.{supervisor['department'].lower().replace(' ', '')}.{year}.{i+1}",
                         f"This {pub_type.lower()} presents {['significant advancements', 'novel methods', 'a comprehensive analysis'][i]} in {expertise} with applications to {supervisor['department']}. {['The work demonstrates superior performance on benchmark datasets.', 'Results show a 25% improvement over state-of-the-art approaches.', 'Case studies reveal important insights for future research directions.'][i]}"
                     ))
-                # Inside the loop that creates publications:
-                for i in range(3):  # 3 publications per supervisor
+                
+                for i in range(3):  
                     year = 2023 - i
                     expertise = supervisor['expertise'][i % len(supervisor['expertise'])]
                     
-                    # Create varied publication titles
+                    
                     if i == 0:
                         title = f"Advances in {expertise}: A Comprehensive Review"
                         pub_type = "Journal Article"
@@ -278,7 +278,7 @@ def create_sample_supervisors():
                         pub_type = "Book Chapter"
                         venue = f"Handbook of {supervisor['department']}"
                     
-                    # Check if publication already exists for this supervisor
+                    
                     cur.execute("""
                         SELECT id FROM supervisor_publications
                         WHERE supervisor_id = %s AND title = %s AND year = %s
@@ -288,7 +288,7 @@ def create_sample_supervisors():
                         year
                     ))
                     
-                    if not cur.fetchone():  # Only insert if not exists
+                    if not cur.fetchone():  
                         # Generate realistic co-authors
                         coauthors = [supervisor['full_name']]
                         coauthors.extend([f"Collaborator {j+1}" for j in range(2)])
@@ -371,7 +371,7 @@ def create_sample_students():
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor()
         
-        # First ensure we have supervisors to match with
+        
         cur.execute("SELECT COUNT(*) FROM users WHERE user_type = 'supervisor'")
         supervisor_count = cur.fetchone()[0]
         
@@ -379,7 +379,7 @@ def create_sample_students():
             print("No supervisors found. Creating sample supervisors first...")
             create_sample_supervisors()
         
-        # Get supervisor IDs and expertise for matching
+        
         cur.execute("""
             SELECT u.id, u.full_name, sp.expertise, sp.research_interests, sp.department
             FROM users u
@@ -451,7 +451,7 @@ def create_sample_students():
                 from auth_app import hash_password
                 password_hash = hash_password(student['password'])
                 
-                # Create user
+                
                 cur.execute("""
                     INSERT INTO users (email, password_hash, full_name, user_type)
                     VALUES (%s, %s::text, %s, %s)
@@ -460,7 +460,7 @@ def create_sample_students():
                 
                 student_id = cur.fetchone()[0]
                 
-                # Create student profile
+                
                 cur.execute("""
                     INSERT INTO student_profiles 
                     (user_id, course, year_of_study)
@@ -557,7 +557,6 @@ def create_sample_students():
                             match['detailed_scores'].get('project_type_match', 0.0)
                         ))
                 
-                # For the first match, create some messages too
                 if matches and len(matches) > 0:
                     first_supervisor_id = next(
                         (s['id'] for s in supervisors_data if s['name'] == matches[0]['supervisor_name']), 
@@ -565,7 +564,7 @@ def create_sample_students():
                     )
                     
                     if first_supervisor_id:
-                        # Create a conversation between student and supervisor
+                        
                         messages = [
                             (student['id'], first_supervisor_id, f"Hello Professor, I'm interested in working with you on my project '{project['title']}'. Would you be available to discuss it further?"),
                             (first_supervisor_id, student['id'], f"Hello {student['name']}, thank you for your interest. Your project sounds interesting. Could you tell me more about your background in {project['technical_requirements'][0]}?"),
@@ -613,22 +612,22 @@ def verify_database():
         users_exists = cur.fetchone()[0]
         
         if not users_exists:
-            # First time setup - tables don't exist
+           
             print("Users table not found, initializing database...")
-            init_db()  # Create all tables
+            init_db()  
             
-            # Create sample data
+            
             create_sample_supervisors()
             create_sample_students()
         else:
             print("Database verification successful!")
             
-            # Check if we have any supervisors (better indicator for sample data)
+            
             cur.execute("SELECT COUNT(*) FROM users WHERE user_type = 'supervisor'")
             supervisor_count = cur.fetchone()[0]
             
             if supervisor_count == 0:
-                # No supervisors found, need to create sample data
+                
                 print("No supervisors found. Creating sample data...")
                 create_sample_supervisors()
                 create_sample_students()
@@ -636,7 +635,7 @@ def verify_database():
                 print(f"Found {supervisor_count} supervisors - sample data already exists")
                 
     except Exception as e:
-        # Handle database connection errors
+        
         print(f"Database verification failed: {str(e)}")
         init_db()
         create_sample_supervisors()
@@ -650,10 +649,10 @@ def verify_database():
 def reset_database():
     """Reset the database for testing purposes"""
     try:
-        # Reinitialize the database
+        
         init_db()
         
-        # Create sample data
+        
         create_sample_supervisors()
         create_sample_students()
         
@@ -680,16 +679,16 @@ def add_admin_reset_controls(st_obj):
         with col2:
             if st_obj.button("Reset Only Student Data", key="reset_students", use_container_width=True):
                 try:
-                    # Delete only student-related data
+                    
                     conn = psycopg2.connect(**DB_CONFIG)
                     cur = conn.cursor()
                     
-                    # Get all student IDs
+                    
                     cur.execute("SELECT id FROM users WHERE user_type = 'student'")
                     student_ids = [row[0] for row in cur.fetchall()]
                     
                     if student_ids:
-                        # Delete related data from various tables
+                        
                         for student_id in student_ids:
                             cur.execute("DELETE FROM matching_history WHERE student_id = %s", (student_id,))
                             cur.execute("DELETE FROM supervisor_requests WHERE student_id = %s", (student_id,))
@@ -697,13 +696,13 @@ def add_admin_reset_controls(st_obj):
                                        (student_id, student_id))
                             cur.execute("DELETE FROM notifications WHERE user_id = %s", (student_id,))
                         
-                        # Delete student profiles and users
+                        
                         cur.execute("DELETE FROM student_profiles WHERE user_id IN (SELECT id FROM users WHERE user_type = 'student')")
                         cur.execute("DELETE FROM users WHERE user_type = 'student'")
                         
                         conn.commit()
                         
-                        # Create new sample students
+                        
                         create_sample_students()
                         
                         st_obj.success("Student data reset successfully!")
@@ -726,7 +725,7 @@ def add_admin_reset_controls(st_obj):
         with col1:
             st_obj.write("**Current Database Stats:**")
             
-            # Count users by type
+            
             conn = psycopg2.connect(**DB_CONFIG)
             cur = conn.cursor()
             
@@ -736,7 +735,7 @@ def add_admin_reset_controls(st_obj):
             for user_type, count in user_counts:
                 st_obj.write(f"• {user_type.title()}s: {count}")
             
-            # Count supervisor requests
+            
             cur.execute("SELECT status, COUNT(*) FROM supervisor_requests GROUP BY status")
             request_counts = cur.fetchall()
             

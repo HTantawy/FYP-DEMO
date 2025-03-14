@@ -9,16 +9,14 @@ from dotenv import load_dotenv
 import re
 
 
-# Load environment variables
 load_dotenv()
 
-# Database connection parameters
-# Replace this:
 
 
-# With this:
+
+
 if hasattr(st, "secrets") and "POSTGRES_DATABASE" in st.secrets:
-    # When deployed to Streamlit Cloud
+    
     DB_CONFIG = {
         'dbname': st.secrets["POSTGRES_DATABASE"],
         'user': st.secrets["POSTGRES_USER"],
@@ -28,7 +26,7 @@ if hasattr(st, "secrets") and "POSTGRES_DATABASE" in st.secrets:
         'sslmode': 'require'  # Required for Neon
     }
 else:
-    # For local development
+    
     DB_CONFIG = {
         'dbname': os.getenv('POSTGRES_DATABASE'),
         'user': os.getenv('POSTGRES_USER'),

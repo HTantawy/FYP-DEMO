@@ -5,20 +5,19 @@ import streamlit as st
 import time
 import uuid
 
-# Load environment variables
+
 load_dotenv()
 
-# Create OpenAI client (new API style)
-# Replace this:
 
 
-# With this:
+
+
 api_key = st.secrets["OPENAI_API_KEY"] if hasattr(st, "secrets") and "OPENAI_API_KEY" in st.secrets else os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
 
 class SupervisorMatcherChatbot:
     def __init__(self):
-        # System message that defines the chatbot's role and knowledge
+        
         self.system_message = """
         You are a helpful assistant for the Research Supervisor Matcher system. 
         Your purpose is to help students navigate the platform and understand how to:
@@ -43,14 +42,14 @@ class SupervisorMatcherChatbot:
         services as appropriate.
         """
         
-        # Initialize conversation history in session state if not already present
+        
         if "chatbot_messages" not in st.session_state:
             st.session_state.chatbot_messages = [
                 {"role": "system", "content": self.system_message},
                 {"role": "assistant", "content": "Hello! I'm your Research Supervisor Matcher assistant. How can I help you with finding a research supervisor today?"}
             ]
         
-        # Initialize feedback dictionary if not present
+        
         if "message_feedback" not in st.session_state:
             st.session_state.message_feedback = {}
     
@@ -67,22 +66,22 @@ class SupervisorMatcherChatbot:
     def generate_response(self, user_input):
         """Generate a response using the OpenAI API"""
         
-        # First check if API key is properly loaded
+        # First we check if API key is properly loaded
         if not client.api_key:
             return "Error: OpenAI API key not found. Please contact the system administrator.", "error"
         
-        # Add the user's message to the conversation history
+        
         user_msg_id = self.add_message("user", user_input)
         
         try:
-            # Prepare messages for API call (without ids)
+            
             api_messages = []
             for msg in self.get_messages_history():
-                if "role" in msg and "content" in msg:  # Make sure required fields exist
+                if "role" in msg and "content" in msg:  
                     api_msg = {"role": msg["role"], "content": msg["content"]}
                     api_messages.append(api_msg)
             
-            # Call the OpenAI API using the new client format
+            
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=api_messages,
@@ -90,10 +89,10 @@ class SupervisorMatcherChatbot:
                 temperature=0.7,
             )
             
-            # Extract the assistant's message from the response (new format)
+            
             assistant_message = response.choices[0].message.content
             
-            # Add the assistant's response to the conversation history
+            
             assistant_msg_id = self.add_message("assistant", assistant_message)
             
             return assistant_message, assistant_msg_id
@@ -119,7 +118,7 @@ class SupervisorMatcherChatbot:
         """Display the chat interface in Streamlit"""
         st.subheader("Chatbot Guidance")
         
-        # Apply custom styling to the chat interface
+        
         st.markdown("""
         <style>
         .user-message {
@@ -276,21 +275,21 @@ class SupervisorMatcherChatbot:
         </style>
         """, unsafe_allow_html=True)
         
-        # Create a better structured chat container
+        
         chat_container = st.container()
         
         with chat_container:
-            # Display the conversation history
+            
             for i, message in enumerate(st.session_state.chatbot_messages):
                 if message["role"] == "system":
-                    continue  # Skip system message
+                    continue  
                 
                 msg_id = message.get("id", str(uuid.uuid4()))
                 
                 if message["role"] == "assistant":
                     st.markdown(f'<div class="assistant-message"><span class="assistant-emoji">🤖</span><span class="typing-animation">{message["content"]}</span></div>', unsafe_allow_html=True)
                     
-                    # Only show feedback buttons for responses after the initial greeting
+                    
                     if i > 1:
                         feedback = st.session_state.message_feedback.get(msg_id, None)
                         helpful_class = "feedback-active" if feedback == "helpful" else ""
@@ -309,7 +308,7 @@ class SupervisorMatcherChatbot:
                 elif message["role"] == "user":
                     st.markdown(f'<div class="user-message">{message["content"]}<span class="user-emoji">👨‍🎓</span></div>', unsafe_allow_html=True)
             
-            # If conversation is just starting, show suggestions
+            
             if len(st.session_state.chatbot_messages) <= 2:
                 st.markdown("""
                     <div style="margin-top: 20px; color: #666; text-align: center;">
@@ -323,7 +322,7 @@ class SupervisorMatcherChatbot:
                     </div>
                 """, unsafe_allow_html=True)
         
-        # Create a custom input area with better alignment
+        
         user_input_container = st.container()
         with user_input_container:
             cols = st.columns([8, 2])
@@ -338,13 +337,13 @@ class SupervisorMatcherChatbot:
             with cols[1]:
                 submit_button = st.button("Send", key="submit_chat", use_container_width=True)
         
-        # Control buttons area
+        
         col1, col2 = st.columns(2)
         with col1:
             clear_button = st.button("🗑️ Clear Conversation", key="clear_chat", use_container_width=True)
         with col2:
-            # Add export conversation button
-            if len(st.session_state.chatbot_messages) > 2:  # Only show if there's a conversation
+            
+            if len(st.session_state.chatbot_messages) > 2:  
                 conversation_text = "\n\n".join(
                     [f"You: {msg['content']}" if msg['role'] == 'user' else f"Assistant: {msg['content']}" 
                     for msg in st.session_state.chatbot_messages if msg['role'] != 'system']
@@ -358,12 +357,12 @@ class SupervisorMatcherChatbot:
                     use_container_width=True
                 )
         
-        # Process user input
+       
         if submit_button and user_input:
             response, msg_id = self.generate_response(user_input)
-            # The interface will be updated next time the script runs
+            
 
-        # Clear conversation if requested
+        
         if clear_button:
             self.clear_conversation()
             st.rerun()
@@ -395,6 +394,6 @@ def display_chatbot_guidance():
     chatbot.display_chat_interface()
 
 if __name__ == "__main__":
-    # For testing the chatbot independently
+    
     st.title("Research Supervisor Matcher")
     display_chatbot_guidance()

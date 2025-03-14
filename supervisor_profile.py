@@ -11,7 +11,7 @@ def get_supervisor_profile(supervisor_id, db_config):
         conn = psycopg2.connect(**db_config)
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
-        # Get basic profile
+        
         cur.execute("""
             SELECT 
                 u.full_name,
@@ -31,7 +31,7 @@ def get_supervisor_profile(supervisor_id, db_config):
         
         profile = cur.fetchone()
         
-        # Get publications
+        
         cur.execute("""
             SELECT * FROM supervisor_publications
             WHERE supervisor_id = %s
@@ -39,7 +39,7 @@ def get_supervisor_profile(supervisor_id, db_config):
         """, (supervisor_id,))
         publications = cur.fetchall()
         
-        # Get supervised projects
+        
         cur.execute("""
             SELECT * FROM supervised_projects
             WHERE supervisor_id = %s
@@ -108,7 +108,7 @@ def add_publication(supervisor_id, pub_data, db_config):
         conn = psycopg2.connect(**db_config)
         cur = conn.cursor()
         
-        # Check if publication already exists
+        
         cur.execute("""
             SELECT id FROM supervisor_publications
             WHERE supervisor_id = %s AND title = %s AND year = %s
@@ -154,7 +154,7 @@ def add_supervised_project(supervisor_id, project_data, db_config):
         conn = psycopg2.connect(**db_config)
         cur = conn.cursor()
         
-        # First check if this project already exists for this supervisor
+        
         cur.execute("""
             SELECT id FROM supervised_projects
             WHERE supervisor_id = %s AND title = %s AND year = %s AND student_name = %s
@@ -169,7 +169,7 @@ def add_supervised_project(supervisor_id, project_data, db_config):
         if existing_project:
             return False
         
-        # If no duplicate, insert the new project
+        
         cur.execute("""
             INSERT INTO supervised_projects
             (supervisor_id, title, student_name, year, project_type, description, outcome)
@@ -205,7 +205,7 @@ def render_profile_page(db_config):
     
     st.title("Profile Management")
     
-    # Get current profile data
+    
     profile_data = get_supervisor_profile(st.session_state.user['id'], db_config)
     if not profile_data:
         st.error("Error loading profile data")
@@ -251,13 +251,13 @@ def render_profile_page(db_config):
         
         col1, col2 = st.columns(2)
         with col1:
-            # Get existing expertise values from profile and ensure it's a list, filtering out empty values
+           
             existing_expertise = profile_data['profile'].get('expertise', [])
             if not isinstance(existing_expertise, list):
                 existing_expertise = [existing_expertise] if existing_expertise else []
             existing_expertise = [exp for exp in existing_expertise if exp]
             
-            # Define comprehensive list of standard expertise options
+            
             standard_expertise = [
                 "Machine Learning", "Deep Learning", "Computer Vision", "NLP",
                 "Data Science", "Cybersecurity", "Software Engineering",
@@ -270,7 +270,7 @@ def render_profile_page(db_config):
                 "Quantum Computing", "AI in Finance", "Pattern Recognition", "Transformers"
             ]
             
-            # Combine both lists and ensure existing values are in options
+            
             all_expertise_options = sorted(list(set(standard_expertise + existing_expertise)))
             default_expertise = [exp for exp in existing_expertise if exp in all_expertise_options]
             
@@ -281,19 +281,19 @@ def render_profile_page(db_config):
             )
         
         with col2:
-            # Get existing project types from profile and ensure it's a list, filtering out empty values
+            
             existing_projects = profile_data['profile'].get('preferred_projects', [])
             if not isinstance(existing_projects, list):
                 existing_projects = [existing_projects] if existing_projects else []
             existing_projects = [proj for proj in existing_projects if proj]
             
-            # Define standard project type options
+           
             standard_projects = [
                 "Research-Based", "Research-based", "Theoretical", 
                 "Industry-focused", "Software Development", "Hardware/IoT"
             ]
             
-            # Combine both lists and ensure existing values are in options
+            
             all_project_options = sorted(list(set(standard_projects + existing_projects)))
             default_projects = [proj for proj in existing_projects if proj in all_project_options]
             
@@ -355,7 +355,7 @@ def render_profile_page(db_config):
                     st.success("Publication added successfully!")
                     st.rerun()
         
-        # Display existing publications
+        
         if profile_data['publications']:
             for pub in profile_data['publications']:
                 with st.expander(f"{pub['year']} - {pub['title']}"):
@@ -404,7 +404,7 @@ def render_profile_page(db_config):
                     st.success("Project added successfully!")
                     st.rerun()
         
-        # Display existing projects
+        
         if profile_data['projects']:
             for project in profile_data['projects']:
                 with st.expander(f"{project['year']} - {project['title']}"):

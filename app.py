@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from student_supervisor import AdvancedSupervisorMatcher, visualize_results, generate_report
 from supervisor_view import view_supervisor_profile
-from chat import display_chatbot_guidance  # New import for chatbot
+from chat import display_chatbot_guidance  
 import json
 from datetime import datetime
 import plotly.graph_objects as go
@@ -13,17 +13,16 @@ import os
 from dotenv import load_dotenv
 from messaging import display_messages_tab
 
-# Load environment variables
 load_dotenv()
 
-# Database connection parameters
+
 DB_CONFIG = {
     'dbname': os.getenv('POSTGRES_DATABASE'),
     'user': os.getenv('POSTGRES_USER'),
     'password': os.getenv('POSTGRES_PASSWORD'),
     'host': os.getenv('POSTGRES_HOST'),
     'port': os.getenv('POSTGRES_PORT', '5432'),
-    'sslmode': 'require'  # Required for Neon
+    'sslmode': 'require'  
 }
 
 # Initialize the matcher
@@ -198,7 +197,7 @@ def save_match_history(student_id, supervisor_id, match_data):
             cur.close()
             conn.close()
 
-# New function: Check if supervisor has available capacity.
+
 def check_supervisor_capacity(supervisor_id, max_capacity):
     """
     Check if the supervisor has reached their capacity.
@@ -223,7 +222,6 @@ def check_supervisor_capacity(supervisor_id, max_capacity):
             cur.close()
             conn.close()
 
-# Single init_session_state definition for all session variables.
 def init_session_state():
     if 'project_data' not in st.session_state:
         st.session_state.project_data = [
@@ -257,7 +255,7 @@ def init_session_state():
 def stylish_tab_navigation():
     """Create a stylish tab navigation system"""
     
-    # Define tabs and their icons
+    
     tabs = [
         {"name": "Search Supervisors", "icon": "🔍"},
         {"name": "My Requests", "icon": "📋"},
@@ -265,11 +263,11 @@ def stylish_tab_navigation():
         {"name": "Chatbot Guidance", "icon": "💬"}
     ]
     
-    # Get the current active tab or set default
+    
     if 'active_tab' not in st.session_state:
         st.session_state.active_tab = "Search Supervisors"
     
-    # Apply custom CSS
+    
     st.markdown("""
     <style>
         /* Custom tab styling */
@@ -311,10 +309,10 @@ def stylish_tab_navigation():
     </style>
     """, unsafe_allow_html=True)
     
-    # Create a horizontal layout for tabs
+    
     cols = st.columns(len(tabs))
     
-    # Display each tab
+   
     for i, tab in enumerate(tabs):
         active_status = "true" if st.session_state.active_tab == tab["name"] else "false"
         
@@ -333,7 +331,7 @@ def show_search_page():
     """Show the supervisor search and matching page"""
     init_session_state()
     
-    # Load matcher and supervisors
+    
     if 'viewing_profile' in st.session_state:
         view_supervisor_profile(
             st.session_state.viewing_profile,
@@ -349,7 +347,7 @@ def show_search_page():
     matcher = load_matcher()
     supervisors = get_supervisors_from_db()
     
-    # Enhanced UI Styling
+    
     st.markdown("""
         <style>
         .project-card {
@@ -394,7 +392,7 @@ def show_search_page():
 
     st.title("Project Proposals")
     
-    # Project tabs
+    
     tab1, tab2, tab3 = st.tabs(["Project 1", "Project 2", "Project 3"])
 
     def create_project_form(index):
@@ -634,20 +632,20 @@ def student_main():
         </div>
     """, unsafe_allow_html=True)
 
-    # Use the stylish tab navigation
+    
     st.session_state.active_tab = stylish_tab_navigation()
     
-    # Display the selected tab content
+   
     if st.session_state.active_tab == "Search Supervisors":
         show_search_page()
     elif st.session_state.active_tab == "My Requests":
         show_requests_page()
-    elif st.session_state.active_tab == "Messages":  # Add new Messages tab condition
+    elif st.session_state.active_tab == "Messages":  
         display_messages_tab(DB_CONFIG)    
-    else:  # Chatbot Guidance tab
+    else:  
         display_chatbot_guidance()
     
-    # Sidebar content
+   
     with st.sidebar:
         st.markdown("""
         <div style="
@@ -715,7 +713,7 @@ def student_main():
         </div>
         """, unsafe_allow_html=True)
         
-        # Simple logout button
+       
         if st.button("Logout", key="sidebar_logout_button", use_container_width=True):
             st.session_state.clear()
             st.rerun()

@@ -8,18 +8,18 @@ from supervisor_profile import get_supervisor_profile
 def view_supervisor_profile(supervisor_id, supervisor_name, db_config):
     """Display a read-only view of a supervisor's profile"""
     
-    # Get the complete profile data
+    
     profile_data = get_supervisor_profile(supervisor_id, db_config)
     if not profile_data:
         st.error("Error loading profile data")
         return
         
-    # Header section with supervisor name and department
+    
     st.title(f"Prof. {supervisor_name}'s Profile")
     if profile_data['profile'].get('department'):
         st.subheader(f"Department of {profile_data['profile']['department']}")
     
-    # Contact and availability information
+    
     with st.container():
         col1, col2 = st.columns(2)
         with col1:
@@ -31,10 +31,10 @@ def view_supervisor_profile(supervisor_id, supervisor_name, db_config):
             if profile_data['profile'].get('website_url'):
                 st.markdown(f"🔗 [Personal Website]({profile_data['profile']['website_url']})")
     
-    # Main content tabs
+    
     tab1, tab2, tab3 = st.tabs(["Research Profile", "Publications", "Past Projects"])
     
-    # Research Profile Tab
+    
     with tab1:
         if profile_data['profile'].get('bio'):
             st.markdown("### About")
@@ -56,10 +56,10 @@ def view_supervisor_profile(supervisor_id, supervisor_name, db_config):
                 for project_type in profile_data['profile']['preferred_projects']:
                     st.markdown(f"- {project_type}")
     
-    # Publications Tab
+    
     with tab2:
         if profile_data['publications']:
-            # Group publications by year
+            
             publications_by_year = {}
             for pub in profile_data['publications']:
                 year = pub['year']
@@ -84,7 +84,7 @@ def view_supervisor_profile(supervisor_id, supervisor_name, db_config):
     # Past Projects Tab
     with tab3:
         if profile_data['projects']:
-            # Group projects by type
+            
             projects_by_type = {}
             for project in profile_data['projects']:
                 proj_type = project['project_type']
@@ -92,7 +92,7 @@ def view_supervisor_profile(supervisor_id, supervisor_name, db_config):
                     projects_by_type[proj_type] = []
                 projects_by_type[proj_type].append(project)
             
-            # Display projects by type
+            
             for proj_type in projects_by_type:
                 st.markdown(f"### {proj_type} Projects")
                 for project in sorted(projects_by_type[proj_type], 

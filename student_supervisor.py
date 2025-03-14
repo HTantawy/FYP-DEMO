@@ -1,39 +1,35 @@
-# Deep Learning and BERT
+
 import torch
 from transformers import AutoTokenizer, AutoModel
 from sentence_transformers import SentenceTransformer
 
-# Data processing and scientific computing
 import numpy as np
 import pandas as pd
 from collections import defaultdict
 
-# Machine Learning and NLP
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MinMaxScaler
 
-# NLTK components
+
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize.punkt import PunktSentenceTokenizer
 
-# Data structures and typing
+
 from typing import List, Dict, Tuple, Any, Optional, Union
 import json
 
-# Visualization
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# System utilities
 import os
 import logging
 from datetime import datetime
 
-# Refined domain weights based on importance
 DOMAIN_WEIGHTS = {
     'research_alignment': 0.30,  # Reduced slightly to balance with other factors
     'methodology_match': 0.25,
@@ -91,12 +87,12 @@ def check_nltk_data():
 
 class AdvancedSupervisorMatcher:
     def __init__(self):
-        # Initialize NLTK resources
+        
         ensure_nltk_resources()
         if not check_nltk_data():
             print("Warning: Some NLTK resources might not be properly installed")
         
-        # Initialize NLTK components
+        
         self.stop_words = set(stopwords.words('english'))
         self.lemmatizer = WordNetLemmatizer()
         
@@ -113,7 +109,7 @@ class AdvancedSupervisorMatcher:
         self.sbert_model = SentenceTransformer('all-mpnet-base-v2')
         self.sbert_model = self.sbert_model.to(self.device)
         
-        # Enhanced TF-IDF vectorizer
+        
         self.tfidf = TfidfVectorizer(
             stop_words='english',
             ngram_range=(1, 2),
@@ -122,10 +118,10 @@ class AdvancedSupervisorMatcher:
             max_features=None
         )
         
-        # Domain weights
+        
         self.domain_weights = DOMAIN_WEIGHTS
         
-        # Technical skills dictionary
+        
         self.technical_skills = {
             'programming': {
                 'languages': ['python', 'java', 'c++', 'javascript', 'r', 'matlab', 'scala', 'ruby', 'php'],
@@ -168,7 +164,7 @@ class AdvancedSupervisorMatcher:
             }
         }
         
-        # Initialize scalers
+        
         self.scalers = {
             'research': MinMaxScaler(),
             'methodology': MinMaxScaler(),
@@ -179,14 +175,14 @@ class AdvancedSupervisorMatcher:
 
     def preprocess_text(self, text: str) -> str:
         """Enhanced text preprocessing with lemmatization and special handling"""
-        # Tokenize and convert to lower case
+        
         tokens = word_tokenize(text.lower())
         
-        # Remove stopwords and lemmatize
+        
         tokens = [self.lemmatizer.lemmatize(token) for token in tokens 
                  if token not in self.stop_words and token.isalnum()]
         
-        # Handle common abbreviations
+        
         abbreviations = {
             'ml': 'machine learning',
             'ai': 'artificial intelligence',
@@ -323,28 +319,28 @@ class AdvancedSupervisorMatcher:
             if not student_terms or not supervisor_terms:
                 return 0.5
             
-            # Get BERT similarity
+            
             bert_sim = float(cosine_similarity(
                 self.get_bert_embedding(student_desc),
                 self.get_bert_embedding(supervisor_interests)
             )[0][0])
             
-            # Get SBERT similarity
+            
             sbert_sim = float(cosine_similarity(
                 self.get_sbert_embedding(student_desc).reshape(1, -1),
                 self.get_sbert_embedding(supervisor_interests).reshape(1, -1)
             )[0][0])
             
-            # Combined semantic similarity
+            
             semantic_sim = 0.4 * bert_sim + 0.6 * sbert_sim
             
-            # Combine with term overlap
+            
             term_overlap = len(student_terms & supervisor_terms) / len(student_terms | supervisor_terms)
             return 0.7 * semantic_sim + 0.3 * term_overlap
             
         except ValueError as e:
             print(f"TF-IDF error: {e}")
-            # Fallback to combined BERT and SBERT similarity
+           
             bert_sim = float(cosine_similarity(
                 self.get_bert_embedding(student_desc),
                 self.get_bert_embedding(supervisor_interests)
@@ -362,7 +358,7 @@ class AdvancedSupervisorMatcher:
         
         student_desc_lower = self.preprocess_text(student_desc)
         
-        # Calculate direct matches
+        
         direct_matches = 0
         for proj_type in supervisor_project_types:
             proj_type_lower = proj_type.lower().replace('-', ' ')
@@ -370,30 +366,30 @@ class AdvancedSupervisorMatcher:
                 direct_matches += 1
         direct_score = direct_matches / len(supervisor_project_types)
         
-        # Calculate semantic similarity using both models
+        
         bert_scores = []
         sbert_scores = []
         for proj_type in supervisor_project_types:
-            # BERT similarity
+            
             bert_sim = float(cosine_similarity(
                 self.get_bert_embedding(student_desc),
                 self.get_bert_embedding(proj_type)
             )[0][0])
             bert_scores.append(bert_sim)
             
-            # SBERT similarity
+            
             sbert_sim = float(cosine_similarity(
                 self.get_sbert_embedding(student_desc).reshape(1, -1),
                 self.get_sbert_embedding(proj_type).reshape(1, -1)
             )[0][0])
             sbert_scores.append(sbert_sim)
         
-        # Combined semantic score
+        
         bert_semantic_score = np.mean(bert_scores) if bert_scores else 0.5
         sbert_semantic_score = np.mean(sbert_scores) if sbert_scores else 0.5
         semantic_score = 0.4 * bert_semantic_score + 0.6 * sbert_semantic_score
         
-        # Final combined score
+        
         return 0.5 * direct_score + 0.5 * semantic_score
 
     def normalize_scores(self, matches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -577,19 +573,19 @@ class AdvancedSupervisorMatcher:
         return list(student_terms & supervisor_terms)
 
 
-# Visualization and reporting functions could be added here
+
 
 def visualize_results(matches: List[Dict[str, Any]], output_file: str = 'matching_results.png'):
     """Create enhanced visualization of matching results with multiple plots"""
     plt.style.use('seaborn')
     fig = plt.figure(figsize=(15, 10))
     
-    # Create grid for multiple plots
+   
     gs = plt.GridSpec(2, 2, figure=fig)
     
-    # 1. Main stacked bar chart (top left)
+    
     ax1 = fig.add_subplot(gs[0, :])
-    supervisors = [m['supervisor_name'] for m in matches[:5]]  # Top 5 matches
+    supervisors = [m['supervisor_name'] for m in matches[:5]]  
     scores = [m['detailed_scores'] for m in matches[:5]]
     
     bottom = np.zeros(len(supervisors))
@@ -607,7 +603,7 @@ def visualize_results(matches: List[Dict[str, Any]], output_file: str = 'matchin
     ax1.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
     ax1.tick_params(axis='x', rotation=45)
     
-    # 2. Confidence scores (bottom left)
+    
     ax2 = fig.add_subplot(gs[1, 0])
     confidence_scores = [m['confidence_score'] for m in matches[:5]]
     bars = ax2.bar(supervisors, confidence_scores, color='#2E5073', alpha=0.7)
@@ -616,17 +612,17 @@ def visualize_results(matches: List[Dict[str, Any]], output_file: str = 'matchin
     ax2.set_ylabel('Confidence Score')
     ax2.tick_params(axis='x', rotation=45)
     
-    # Add value labels
+    
     for bar in bars:
         height = bar.get_height()
         ax2.text(bar.get_x() + bar.get_width()/2., height,
                 f'{height:.2f}', ha='center', va='bottom')
     
-    # 3. Skills matching heatmap (bottom right)
+    
     ax3 = fig.add_subplot(gs[1, 1])
     skill_categories = list(DOMAIN_WEIGHTS.keys())
     skill_scores = np.array([[m['detailed_scores'][cat] for cat in skill_categories] 
-                            for m in matches[:3]])  # Top 3 matches
+                            for m in matches[:3]])  
     
     im = ax3.imshow(skill_scores, cmap='YlOrRd', aspect='auto')
     ax3.set_xticks(np.arange(len(skill_categories)))
@@ -636,11 +632,11 @@ def visualize_results(matches: List[Dict[str, Any]], output_file: str = 'matchin
     plt.setp(ax3.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     ax3.set_title('Detailed Score Comparison')
     
-    # Add colorbar
+    
     cbar = fig.colorbar(im)
     cbar.set_label('Score', rotation=270, labelpad=15)
     
-    # Add score values in cells
+    
     for i in range(len(matches[:3])):
         for j in range(len(skill_categories)):
             text = ax3.text(j, i, f'{skill_scores[i, j]:.2f}',
@@ -661,7 +657,7 @@ def generate_report(student_data: Dict[str, Any], matches: List[Dict[str, Any]])
         "=" * 50
     ]
     
-    for i, match in enumerate(matches[:5], 1):  # Top 5 matches
+    for i, match in enumerate(matches[:5], 1):  
         report.extend([
             f"\n{i}. {match['supervisor_name']}",
             f"Overall Match Score: {match['final_score']:.3f}",
@@ -675,7 +671,7 @@ def generate_report(student_data: Dict[str, Any], matches: List[Dict[str, Any]])
             "\nMatching Skills Analysis:"
         ])
         
-        # Add detailed skills breakdown
+        
         if match['matching_skills']:
             for category, subcategories in match['matching_skills'].items():
                 report.append(f"\n{category.replace('_', ' ').title()}:")
@@ -684,13 +680,13 @@ def generate_report(student_data: Dict[str, Any], matches: List[Dict[str, Any]])
         else:
             report.append("  No direct skill matches found")
         
-        # Add methodology analysis
+        
         if match['methodology_overlap']:
             report.append("\nMethodology Compatibility:")
             for method_type, approaches in match['methodology_overlap'].items():
                 report.append(f"  - {method_type.replace('_', ' ').title()}: {', '.join(approaches)}")
         
-        # Add research keywords
+    
         if match.get('research_keywords'):
             report.append("\nShared Research Keywords:")
             report.append("  " + ", ".join(match['research_keywords']))

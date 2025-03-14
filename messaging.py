@@ -19,7 +19,7 @@ def send_message(sender_id, receiver_id, message_text, db_config):
         message_id = cur.fetchone()[0]
         conn.commit()
         
-        # Add notification for the receiver
+        
         cur.execute("""
             INSERT INTO notifications (user_id, message, type)
             VALUES (%s, %s, 'new_message')
@@ -70,7 +70,7 @@ def get_conversation_messages(user_id, other_user_id, db_config):
         
         messages = cur.fetchall()
         
-        # Mark unread messages as read if the current user is the receiver
+        
         cur.execute("""
             UPDATE messages
             SET is_read = TRUE
@@ -95,7 +95,7 @@ def get_user_conversations(user_id, db_config):
         conn = psycopg2.connect(**db_config)
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
-        # Get the most recent message from each conversation
+        
         cur.execute("""
             WITH recent_messages AS (
                 SELECT 
@@ -144,7 +144,7 @@ def get_potential_recipients(user_id, user_type, db_config):
         conn = psycopg2.connect(**db_config)
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
-        # For students, get supervisors they've requested
+        
         if user_type == 'student':
             cur.execute("""
                 SELECT DISTINCT 
@@ -155,7 +155,7 @@ def get_potential_recipients(user_id, user_type, db_config):
                 WHERE sr.student_id = %s
                 ORDER BY u.full_name
             """, (user_id,))
-        # For supervisors, get students who have sent them requests
+        
         elif user_type == 'supervisor':
             cur.execute("""
                 SELECT DISTINCT 
@@ -188,65 +188,65 @@ def display_messages_tab(db_config):
     user_id = st.session_state.user['id']
     user_type = st.session_state.user_type
     
-    # Initialize session state for messaging
+    
     if 'active_conversation' not in st.session_state:
         st.session_state.active_conversation = None
     if 'new_message_recipient' not in st.session_state:
         st.session_state.new_message_recipient = None
     
-    # Main layout
+    
     col1, col2 = st.columns([1, 3])
     
-    # Conversations list (left sidebar)
+    
     with col1:
         st.subheader("Conversations")
         
-        # New Message button
+        
         if st.button("➕ New Message", use_container_width=True):
             st.session_state.active_conversation = None
             st.session_state.new_message_recipient = True
             st.rerun()
         
-        # Get list of conversations
+        
         conversations = get_user_conversations(user_id, db_config)
         
-        # Display conversations list
+        
         for conversation in conversations:
             other_user = conversation['other_user_name']
             unread = conversation['unread_count']
             
-            # Format the button label with unread count if needed
+            
             button_label = other_user
             if unread > 0:
                 button_label = f"{other_user} ({unread} new)"
             
-            # Button for each conversation
+           
             if st.button(button_label, key=f"conv_{conversation['other_user_id']}", use_container_width=True):
                 st.session_state.active_conversation = conversation['other_user_id']
                 st.session_state.new_message_recipient = None
                 st.rerun()
     
-    # Main content area (right side)
+    
     with col2:
-        # New message composition
+        
         if st.session_state.new_message_recipient:
             st.subheader("New Message")
             
-            # Get potential recipients
+            
             recipients = get_potential_recipients(user_id, user_type, db_config)
             
             if not recipients:
                 st.info("You don't have any contacts yet. For students, you can message supervisors after sending a request. For supervisors, you can message students who have sent you requests.")
             else:
-                # Select recipient dropdown
+                
                 recipient_options = {r['full_name']: r['id'] for r in recipients}
                 selected_name = st.selectbox("Select recipient:", list(recipient_options.keys()))
                 selected_id = recipient_options[selected_name]
                 
-                # Message input
+                
                 message_text = st.text_area("Message:", height=100)
                 
-                # Send button
+                
                 if st.button("Send", use_container_width=True):
                     if message_text.strip():
                         success, _ = send_message(user_id, selected_id, message_text, db_config)
@@ -258,11 +258,11 @@ def display_messages_tab(db_config):
                     else:
                         st.warning("Please enter a message")
         
-        # Conversation view
+        
         elif st.session_state.active_conversation:
             other_user_id = st.session_state.active_conversation
             
-            # Get other user's name
+            
             conn = psycopg2.connect(**db_config)
             cur = conn.cursor(cursor_factory=RealDictCursor)
             cur.execute("SELECT full_name FROM users WHERE id = %s", (other_user_id,))
@@ -273,10 +273,10 @@ def display_messages_tab(db_config):
             if other_user:
                 st.subheader(f"Conversation with {other_user['full_name']}")
                 
-                # Get messages
+               
                 messages = get_conversation_messages(user_id, other_user_id, db_config)
                 
-                # Add CSS for scrollable container
+                
                 st.markdown("""
                     <style>
                     .message-container {
@@ -290,17 +290,17 @@ def display_messages_tab(db_config):
                     </style>
                 """, unsafe_allow_html=True)
                 
-                # Open a container div
+                
                 st.markdown('<div class="message-container">', unsafe_allow_html=True)
                 
-                # Display messages
+                
                 for msg in messages:
                     is_from_me = msg['sender_id'] == user_id
                     
-                    # Format timestamp
+                   
                     timestamp = msg['created_at'].strftime("%Y-%m-%d %H:%M")
                     
-                    # Style for messages
+                    
                     if is_from_me:
                         st.markdown(f"""
                             <div style="margin-bottom: 10px; text-align: right;">
@@ -320,13 +320,13 @@ def display_messages_tab(db_config):
                             </div>
                         """, unsafe_allow_html=True)
                 
-                # Close the container div
+                
                 st.markdown('</div>', unsafe_allow_html=True)
                 
-                # Message input
+                
                 new_message = st.text_area("Message:", key="new_msg_input", height=100)
                 
-                # Send button
+                
                 if st.button("Send", key="send_in_conversation", use_container_width=True):
                     if new_message.strip():
                         success, _ = send_message(user_id, other_user_id, new_message, db_config)
@@ -338,11 +338,10 @@ def display_messages_tab(db_config):
             else:
                 st.error("User not found")
         
-        # No active conversation
+        
         else:
             st.info("Select a conversation or start a new message")
 
 if __name__ == "__main__":
-    # For testing
     from auth_app import DB_CONFIG
     display_messages_tab(DB_CONFIG)

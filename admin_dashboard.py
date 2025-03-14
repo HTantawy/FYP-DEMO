@@ -16,7 +16,7 @@ def admin_dashboard():
         st.error("Please login as an admin to access this page")
         return
     
-    # --- Custom CSS for better styling ---
+    
     st.markdown("""
         <style>
         .main-header {
@@ -291,7 +291,7 @@ def admin_dashboard():
         </style>
     """, unsafe_allow_html=True)
     
-    # Sidebar with improved styling
+    
     with st.sidebar:
         st.markdown("""
             <div style='padding: 1rem;'>
@@ -302,7 +302,7 @@ def admin_dashboard():
             st.session_state.clear()
             st.rerun()
 
-    # Main header
+  
     st.markdown("""
         <div style="background-color: #fff; padding: 1rem; border-radius: 8px; 
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1rem;">
@@ -312,7 +312,7 @@ def admin_dashboard():
         </div>
     """, unsafe_allow_html=True)    
 
-    # Enhanced tabs
+    
     tabs = st.tabs(["📊 Matches Overview", "👥 Manage Supervisors and Students", "📋 Student Allocations"])
 
     with tabs[0]:
@@ -332,9 +332,9 @@ def show_matches_overview():
         st.info("No matches found.")
         return
     
-    # Loop through each match and present it as a 'card'
+    
     for idx, row in matches.iterrows():
-        # Decide on the color styles for the final_score
+        
         score_style = get_score_style(row['final_score'])
         created_str = row['created_at'].strftime('%Y-%m-%d %H:%M')
 
@@ -379,7 +379,7 @@ def show_student_allocations():
         st.info("No students found.")
         return
         
-    # Enhanced filters section
+    
     
     col1, col2 = st.columns([2, 1])
     with col1:
@@ -388,7 +388,7 @@ def show_student_allocations():
         status_filter = st.selectbox("All Students", ["All", "Allocated", "Unallocated"], index=0)
     
 
-    # Apply filters
+    
     filtered_students = students
     if status_filter != "All":
         filtered_students = filtered_students[filtered_students['allocation_status'] == status_filter.lower()]
@@ -399,7 +399,7 @@ def show_student_allocations():
         )
         filtered_students = filtered_students[mask]
     
-    # Statistics cards
+    
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown(f"""
@@ -425,7 +425,7 @@ def show_student_allocations():
             </div>
         """, unsafe_allow_html=True)
     
-    # --- Now, show results as containers/cards (instead of a DataFrame) ---
+    
     st.markdown('<div class="allocation-cards-container">', unsafe_allow_html=True)
     for _, row in filtered_students.iterrows():
         status_class = "allocation-badge-allocated" if row['allocation_status'] == 'allocated' else "allocation-badge-unallocated"
@@ -469,10 +469,10 @@ def show_student_allocations():
 def generate_pdf_report(students_df):
     """Generate PDF report of student allocations with improved styling"""
     try:
-        # Create a buffer to store PDF
+        
         buffer = io.BytesIO()
         
-        # Create PDF document with custom styling
+        
         doc = SimpleDocTemplate(
             buffer,
             pagesize=A4,
@@ -482,7 +482,7 @@ def generate_pdf_report(students_df):
             bottomMargin=40
         )
         
-        # Define styles
+        
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
             'CustomTitle',
@@ -490,7 +490,7 @@ def generate_pdf_report(students_df):
             fontSize=24,
             spaceAfter=30,
             textColor=colors.HexColor('#1E3D59'),
-            alignment=1  # Center alignment
+            alignment=1  
         )
         
         subtitle_style = ParagraphStyle(
@@ -498,14 +498,14 @@ def generate_pdf_report(students_df):
             parent=styles['Normal'],
             fontSize=12,
             textColor=colors.HexColor('#666666'),
-            alignment=1,  # Center alignment
+            alignment=1,  
             spaceAfter=20
         )
         
-        # Container for elements
+        
         elements = []
         
-        # Add title and timestamp
+       
         elements.append(Paragraph("Student Allocations Report", title_style))
         elements.append(Paragraph(
             f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
@@ -513,7 +513,7 @@ def generate_pdf_report(students_df):
         ))
         elements.append(Spacer(1, 20))
         
-        # Add statistics
+        
         total_students = len(students_df)
         allocated = len(students_df[students_df['allocation_status'] == 'allocated'])
         unallocated = total_students - allocated
@@ -523,7 +523,7 @@ def generate_pdf_report(students_df):
             parent=styles['Normal'],
             fontSize=12,
             spaceAfter=20,
-            alignment=0  # Left alignment
+            alignment=0  
         )
         
         stats_text = f"""
@@ -535,7 +535,7 @@ def generate_pdf_report(students_df):
         elements.append(Paragraph(stats_text, stats_style))
         elements.append(Spacer(1, 20))
         
-        # Prepare table data
+        
         headers = ['Full Name', 'Email', 'Course', 'Year', 'Status', 'Supervisor']
         data = [headers]
         
@@ -549,7 +549,7 @@ def generate_pdf_report(students_df):
                 row['supervisor_name'] if row['supervisor_name'] not in ['None', '-'] else '-'
             ])
         
-        # Create and style table
+        
         table = Table(data, repeatRows=1)
         table.setStyle(TableStyle([
             # Headers
@@ -655,9 +655,7 @@ def show_supervisor_details(supervisor_id, supervisor_name):
             st.markdown("</div>", unsafe_allow_html=True)
 
 
-# -------------------------
-# Database Helper Functions
-# -------------------------
+
 def get_all_students_with_allocation():
     """Fetch all students with their allocation status."""
     try:
