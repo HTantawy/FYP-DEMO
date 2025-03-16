@@ -31,11 +31,10 @@ import logging
 from datetime import datetime
 
 DOMAIN_WEIGHTS = {
-    'research_alignment': 0.30,  # Reduced slightly to balance with other factors
-    'methodology_match': 0.25,
-    'technical_skills': 0.20,  # Increased due to importance for project success
-    'domain_knowledge': 0.15,  # Increased for better subject matter matching
-    'project_type_match': 0.10  # Slightly reduced but still significant
+    'research_alignment': 0.40,
+    'technical_skills': 0.25,
+    'domain_knowledge': 0.25,
+    'project_type_match': 0.10
 }
 
 def ensure_nltk_resources():
@@ -52,7 +51,6 @@ def ensure_nltk_resources():
     else:
         ssl._create_default_https_context = _create_unverified_https_context
 
-    # Create default directory if it doesn't exist
     nltk_data_dir = os.path.expanduser('~/nltk_data')
     if not os.path.exists(nltk_data_dir):
         os.makedirs(nltk_data_dir)
@@ -96,9 +94,9 @@ class AdvancedSupervisorMatcher:
         self.stop_words = set(stopwords.words('english'))
         self.lemmatizer = WordNetLemmatizer()
         
-        # Initialize both BERT and SBERT models
+        
         print("Loading BERT and SBERT models...")
-        # Original BERT
+       
         self.tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
         self.model = AutoModel.from_pretrained('bert-base-uncased')
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -109,7 +107,7 @@ class AdvancedSupervisorMatcher:
         self.sbert_model = SentenceTransformer('all-mpnet-base-v2')
         self.sbert_model = self.sbert_model.to(self.device)
         
-        
+        # Enhanced TF-IDF vectorizer
         self.tfidf = TfidfVectorizer(
             stop_words='english',
             ngram_range=(1, 2),
@@ -118,10 +116,10 @@ class AdvancedSupervisorMatcher:
             max_features=None
         )
         
-        
+        # Domain weights
         self.domain_weights = DOMAIN_WEIGHTS
         
-        
+        # Technical skills dictionary
         self.technical_skills = {
             'programming': {
                 'languages': ['python', 'java', 'c++', 'javascript', 'r', 'matlab', 'scala', 'ruby', 'php'],
@@ -144,25 +142,8 @@ class AdvancedSupervisorMatcher:
             }
         }
         
-        # Methodology terms
-        self.methodology_terms = {
-            'quantitative': {
-                'statistical': ['regression analysis', 'statistical modeling', 'hypothesis testing', 
-                              'quantitative methods', 'statistical analysis'],
-                'experimental': ['controlled experiment', 'randomized trial', 'quasi-experimental'],
-                'computational': ['simulation', 'numerical analysis', 'mathematical modeling']
-            },
-            'qualitative': {
-                'methods': ['case study', 'ethnography', 'grounded theory', 'phenomenology'],
-                'data_collection': ['interviews', 'focus groups', 'observation', 'document analysis'],
-                'analysis': ['thematic analysis', 'content analysis', 'discourse analysis']
-            },
-            'mixed_methods': {
-                'approaches': ['mixed methods', 'triangulation', 'sequential explanatory', 
-                             'concurrent nested', 'transformative'],
-                'integration': ['data integration', 'methodological integration', 'theoretical integration']
-            }
-        }
+        
+        
         
         
         self.scalers = {
@@ -175,20 +156,29 @@ class AdvancedSupervisorMatcher:
 
     def preprocess_text(self, text: str) -> str:
         """Enhanced text preprocessing with lemmatization and special handling"""
-        
+        # Tokenize and convert to lower case
         tokens = word_tokenize(text.lower())
         
-        
+        # Remove stopwords and lemmatize
         tokens = [self.lemmatizer.lemmatize(token) for token in tokens 
                  if token not in self.stop_words and token.isalnum()]
         
-        
+        # Handle common abbreviations
         abbreviations = {
             'ml': 'machine learning',
             'ai': 'artificial intelligence',
             'dl': 'deep learning',
             'nlp': 'natural language processing',
-            'cv': 'computer vision'
+            'cv': 'computer vision',
+            'hci': 'human-computer interaction',
+            'ux': 'user experience',
+            'fp': 'functional programming',
+            'rl': 'reinforcement learning',
+            'fl': 'federated learning',
+            'svm': 'support vector machine',
+            'cnn': 'convolutional neural network',
+            'rnn': 'recurrent neural network',
+            'EA': 'Evolutionary Algorithms'
         }
         
         processed_tokens = []
@@ -268,41 +258,7 @@ class AdvancedSupervisorMatcher:
         
         return dict(found_skills)
 
-    def calculate_methodology_match(self, student_desc: str, supervisor_interests: str) -> float:
-        """Calculate methodology alignment"""
-        student_methods = self._extract_methodology(student_desc)
-        supervisor_methods = self._extract_methodology(supervisor_interests)
-        
-        if not student_methods or not supervisor_methods:
-            return 0.5
-        
-        total_score = 0
-        weights = {'quantitative': 0.4, 'qualitative': 0.3, 'mixed_methods': 0.3}
-        
-        for category, weight in weights.items():
-            if category in student_methods and category in supervisor_methods:
-                student_subs = set(student_methods[category])
-                supervisor_subs = set(supervisor_methods[category])
-                overlap = len(student_subs & supervisor_subs)
-                total = len(student_subs | supervisor_subs)
-                
-                if total > 0:
-                    total_score += weight * (overlap / total)
-        
-        return total_score
-
-    def _extract_methodology(self, text: str) -> Dict[str, set]:
-        """Extract methodology terms"""
-        text_lower = self.preprocess_text(text)
-        found_methods = defaultdict(set)
-        
-        for category, subcategories in self.methodology_terms.items():
-            for subcategory, terms in subcategories.items():
-                for term in terms:
-                    if term in text_lower:
-                        found_methods[category].add(subcategory)
-        
-        return dict(found_methods)
+    
 
     def calculate_domain_knowledge(self, student_desc: str, supervisor_interests: str) -> float:
         """Calculate domain knowledge using both BERT and SBERT"""
@@ -319,28 +275,28 @@ class AdvancedSupervisorMatcher:
             if not student_terms or not supervisor_terms:
                 return 0.5
             
-            
+            # Get BERT similarity
             bert_sim = float(cosine_similarity(
                 self.get_bert_embedding(student_desc),
                 self.get_bert_embedding(supervisor_interests)
             )[0][0])
             
-            
+            # Get SBERT similarity
             sbert_sim = float(cosine_similarity(
                 self.get_sbert_embedding(student_desc).reshape(1, -1),
                 self.get_sbert_embedding(supervisor_interests).reshape(1, -1)
             )[0][0])
             
-            
+            # Combined semantic similarity
             semantic_sim = 0.4 * bert_sim + 0.6 * sbert_sim
             
-            
+            # Combine with term overlap
             term_overlap = len(student_terms & supervisor_terms) / len(student_terms | supervisor_terms)
             return 0.7 * semantic_sim + 0.3 * term_overlap
             
         except ValueError as e:
             print(f"TF-IDF error: {e}")
-           
+            # Fallback to combined BERT and SBERT similarity
             bert_sim = float(cosine_similarity(
                 self.get_bert_embedding(student_desc),
                 self.get_bert_embedding(supervisor_interests)
@@ -358,7 +314,7 @@ class AdvancedSupervisorMatcher:
         
         student_desc_lower = self.preprocess_text(student_desc)
         
-        
+        # Calculate direct matches
         direct_matches = 0
         for proj_type in supervisor_project_types:
             proj_type_lower = proj_type.lower().replace('-', ' ')
@@ -366,30 +322,30 @@ class AdvancedSupervisorMatcher:
                 direct_matches += 1
         direct_score = direct_matches / len(supervisor_project_types)
         
-        
+        # Calculate semantic similarity using both models
         bert_scores = []
         sbert_scores = []
         for proj_type in supervisor_project_types:
-            
+            # BERT similarity
             bert_sim = float(cosine_similarity(
                 self.get_bert_embedding(student_desc),
                 self.get_bert_embedding(proj_type)
             )[0][0])
             bert_scores.append(bert_sim)
             
-            
+            # SBERT similarity
             sbert_sim = float(cosine_similarity(
                 self.get_sbert_embedding(student_desc).reshape(1, -1),
                 self.get_sbert_embedding(proj_type).reshape(1, -1)
             )[0][0])
             sbert_scores.append(sbert_sim)
         
-        
+        # Combined semantic score
         bert_semantic_score = np.mean(bert_scores) if bert_scores else 0.5
         sbert_semantic_score = np.mean(sbert_scores) if sbert_scores else 0.5
         semantic_score = 0.4 * bert_semantic_score + 0.6 * sbert_semantic_score
         
-        
+        # Final combined score
         return 0.5 * direct_score + 0.5 * semantic_score
 
     def normalize_scores(self, matches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -399,7 +355,6 @@ class AdvancedSupervisorMatcher:
             
         score_matrices = {
             'research': [],
-            'methodology': [],
             'technical': [],
             'domain': [],
             'project': []
@@ -408,7 +363,6 @@ class AdvancedSupervisorMatcher:
         for match in matches:
             scores = match['detailed_scores']
             score_matrices['research'].append([scores['research_alignment']])
-            score_matrices['methodology'].append([scores['methodology_match']])
             score_matrices['technical'].append([scores['technical_skills']])
             score_matrices['domain'].append([scores['domain_knowledge']])
             score_matrices['project'].append([scores['project_type_match']])
@@ -432,10 +386,7 @@ class AdvancedSupervisorMatcher:
                 supervisor['interests']
             )
             
-            methodology_score = self.calculate_methodology_match(
-                student_data['project_description'],
-                supervisor['interests']
-            )
+            
             
             student_skills = self.extract_technical_skills(student_data['project_description'])
             supervisor_skills = self.extract_technical_skills(supervisor['interests'])
@@ -484,7 +435,6 @@ class AdvancedSupervisorMatcher:
             
             detailed_scores = {
                 'research_alignment': research_score,
-                'methodology_match': methodology_score,
                 'technical_skills': technical_score,
                 'domain_knowledge': domain_score,
                 'project_type_match': project_type_score
@@ -516,7 +466,6 @@ class AdvancedSupervisorMatcher:
                 self.domain_weights[weight] * detailed_scores[score]
                 for weight, score in {
                     'research_alignment': 'research_alignment',
-                    'methodology_match': 'methodology_match',
                     'technical_skills': 'technical_skills',
                     'domain_knowledge': 'domain_knowledge',
                     'project_type_match': 'project_type_match'
@@ -531,7 +480,6 @@ class AdvancedSupervisorMatcher:
                 'confidence_score': confidence_score,
                 'detailed_scores': detailed_scores,
                 'matching_skills': matching_skills,
-                'methodology_overlap': self._extract_methodology(supervisor['interests']),
                 'research_keywords': self._extract_research_keywords(
                     student_data['project_description'],
                     supervisor['interests']
@@ -553,8 +501,6 @@ class AdvancedSupervisorMatcher:
         if not matching_skills:
             confidence *= 0.9
         
-        if not self._extract_methodology(student_desc) or not self._extract_methodology(supervisor_interests):
-            confidence *= 0.9
         
         keywords = self._extract_research_keywords(student_desc, supervisor_interests)
         if len(keywords) < 3:
@@ -573,17 +519,14 @@ class AdvancedSupervisorMatcher:
         return list(student_terms & supervisor_terms)
 
 
-
-
 def visualize_results(matches: List[Dict[str, Any]], output_file: str = 'matching_results.png'):
     """Create enhanced visualization of matching results with multiple plots"""
     plt.style.use('seaborn')
     fig = plt.figure(figsize=(15, 10))
     
-   
+  
     gs = plt.GridSpec(2, 2, figure=fig)
-    
-    
+   
     ax1 = fig.add_subplot(gs[0, :])
     supervisors = [m['supervisor_name'] for m in matches[:5]]  
     scores = [m['detailed_scores'] for m in matches[:5]]
@@ -622,7 +565,7 @@ def visualize_results(matches: List[Dict[str, Any]], output_file: str = 'matchin
     ax3 = fig.add_subplot(gs[1, 1])
     skill_categories = list(DOMAIN_WEIGHTS.keys())
     skill_scores = np.array([[m['detailed_scores'][cat] for cat in skill_categories] 
-                            for m in matches[:3]])  
+                            for m in matches[:3]])  # Top 3 matches
     
     im = ax3.imshow(skill_scores, cmap='YlOrRd', aspect='auto')
     ax3.set_xticks(np.arange(len(skill_categories)))
@@ -631,12 +574,11 @@ def visualize_results(matches: List[Dict[str, Any]], output_file: str = 'matchin
     ax3.set_yticklabels([m['supervisor_name'] for m in matches[:3]])
     plt.setp(ax3.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     ax3.set_title('Detailed Score Comparison')
-    
-    
+   
     cbar = fig.colorbar(im)
     cbar.set_label('Score', rotation=270, labelpad=15)
     
-    
+    # Add score values in cells
     for i in range(len(matches[:3])):
         for j in range(len(skill_categories)):
             text = ax3.text(j, i, f'{skill_scores[i, j]:.2f}',
@@ -657,21 +599,20 @@ def generate_report(student_data: Dict[str, Any], matches: List[Dict[str, Any]])
         "=" * 50
     ]
     
-    for i, match in enumerate(matches[:5], 1):  
+    for i, match in enumerate(matches[:5], 1):  # Top 5 matches
         report.extend([
             f"\n{i}. {match['supervisor_name']}",
             f"Overall Match Score: {match['final_score']:.3f}",
             f"Confidence Score: {match['confidence_score']:.3f}",
             "\nDetailed Scores:",
             f"- Research Alignment: {match['detailed_scores']['research_alignment']:.3f}",
-            f"- Methodology Match: {match['detailed_scores']['methodology_match']:.3f}",
             f"- Technical Skills: {match['detailed_scores']['technical_skills']:.3f}",
             f"- Domain Knowledge: {match['detailed_scores']['domain_knowledge']:.3f}",
             f"- Project Type Match: {match['detailed_scores']['project_type_match']:.3f}",
             "\nMatching Skills Analysis:"
         ])
         
-        
+        # Add detailed skills breakdown
         if match['matching_skills']:
             for category, subcategories in match['matching_skills'].items():
                 report.append(f"\n{category.replace('_', ' ').title()}:")
@@ -681,12 +622,8 @@ def generate_report(student_data: Dict[str, Any], matches: List[Dict[str, Any]])
             report.append("  No direct skill matches found")
         
         
-        if match['methodology_overlap']:
-            report.append("\nMethodology Compatibility:")
-            for method_type, approaches in match['methodology_overlap'].items():
-                report.append(f"  - {method_type.replace('_', ' ').title()}: {', '.join(approaches)}")
         
-    
+        # Add research keywords
         if match.get('research_keywords'):
             report.append("\nShared Research Keywords:")
             report.append("  " + ", ".join(match['research_keywords']))
