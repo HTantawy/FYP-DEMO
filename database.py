@@ -569,7 +569,7 @@ def create_sample_students():
                         cur.execute("""
                             INSERT INTO matching_history 
                             (student_id, supervisor_id, final_score, research_alignment, technical_skills, domain_knowledge, project_type_match)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s)
                         """, (
                             student['id'],
                             supervisor_id,
