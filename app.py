@@ -173,7 +173,7 @@ def save_match_history(student_id, supervisor_id, match_data):
         cur.execute("""
             INSERT INTO matching_history 
             (student_id, supervisor_id, final_score, research_alignment,technical_skills, domain_knowledge, project_type_match, matching_skills)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             student_id,
             supervisor_id,
