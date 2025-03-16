@@ -127,7 +127,6 @@ def init_db():
         supervisor_id INTEGER REFERENCES users(id),
         final_score FLOAT NOT NULL,
         research_alignment FLOAT NOT NULL,
-        methodology_match FLOAT NOT NULL,
         technical_skills FLOAT NOT NULL,
         domain_knowledge FLOAT NOT NULL,
         project_type_match FLOAT DEFAULT 0.0,           

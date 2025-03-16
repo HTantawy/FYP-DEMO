@@ -401,7 +401,6 @@ def create_sample_students():
                         "title": "Deep Learning for Facial Recognition in Crowded Environments",
                         "description": "This project aims to develop a robust facial recognition system that works effectively in crowded environments with partial occlusions. The approach will use advanced deep learning techniques including transformers and attention mechanisms to improve accuracy in challenging conditions.",
                         "technical_requirements": ["Python", "TensorFlow", "Deep Learning", "Computer Vision", " Data Analysis"],
-                        "methodology": "Quantitative",
                         "project_type": ["Research-Based", "Software Development"]
                     }
                 ]
@@ -417,7 +416,6 @@ def create_sample_students():
                         "title": "Generating Medical Reports from X-ray Images Using Large Language Models",
                         "description": "A project exploring the application of large language models to automatically generate preliminary medical reports from X-ray images. The system will combine computer vision techniques with NLP to create accurate, clinically relevant descriptions of medical images.",
                         "technical_requirements": ["Python", "PyTorch", "NLP", "Computer Vision", "Medical Imaging"],
-                        "methodology": "Mixed Methods",
                         "project_type": ["Research-Based", "Software Development"]
                     }
                 ]
@@ -433,7 +431,6 @@ def create_sample_students():
                         "title": "Predictive Analytics for Stock Market Trends Using Alternative Data",
                         "description": "This project will investigate how alternative data sources like social media sentiment, satellite imagery, and web scraping can enhance traditional stock market prediction models. It will implement a hybrid approach combining traditional time series analysis with deep learning techniques.",
                         "technical_requirements": ["Python", "Big Data Processing", "Machine Learning", "Data Science"],
-                        "methodology": "Quantitative",
                         "project_type": ["Industry-focused", "Research-Based"]
                     }
                 ]
@@ -493,7 +490,6 @@ def create_sample_students():
                     'project_description': (
                         f"{project['description']}\n"
                         f"Technical requirements: {', '.join(project['technical_requirements'])}.\n"
-                        f"Research methodology: {project['methodology']}."
                         f"Project type: {', '.join(project['project_type'])}."
                     ),
                     'project_type': project['project_type']
@@ -543,15 +539,13 @@ def create_sample_students():
                         # Create matching history
                         cur.execute("""
                             INSERT INTO matching_history 
-                            (student_id, supervisor_id, final_score, research_alignment, 
-                             methodology_match, technical_skills, domain_knowledge, project_type_match)
+                            (student_id, supervisor_id, final_score, research_alignment, technical_skills, domain_knowledge, project_type_match)
                             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                         """, (
                             student['id'],
                             supervisor_id,
                             match['final_score'],
                             match['detailed_scores']['research_alignment'],
-                            match['detailed_scores']['methodology_match'],
                             match['detailed_scores']['technical_skills'],
                             match['detailed_scores']['domain_knowledge'],
                             match['detailed_scores'].get('project_type_match', 0.0)

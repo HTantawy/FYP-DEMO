@@ -148,7 +148,6 @@ class AdvancedSupervisorMatcher:
         
         self.scalers = {
             'research': MinMaxScaler(),
-            'methodology': MinMaxScaler(),
             'technical': MinMaxScaler(),
             'domain': MinMaxScaler(),
             'project': MinMaxScaler()

@@ -103,14 +103,13 @@ def save_supervisor_request(student_id, supervisor_id, project_data, match_score
 
 def create_match_visualization(matches):
     """Create visualization for matching results"""
-    categories = ['Research Alignment', 'Methodology Match', 'Technical Skills', 'Domain Knowledge', 'Project Type Match']
+    categories = ['Research Alignment', 'Technical Skills', 'Domain Knowledge', 'Project Type Match']
     
     fig = go.Figure()
     
     for i, match in enumerate(matches[:3]):  # Top 3 matches
         scores = [
             match['detailed_scores']['research_alignment'],
-            match['detailed_scores']['methodology_match'],
             match['detailed_scores']['technical_skills'],
             match['detailed_scores']['domain_knowledge'],
             match['detailed_scores'].get('project_type_match', 0.0) 
@@ -173,14 +172,13 @@ def save_match_history(student_id, supervisor_id, match_data):
 
         cur.execute("""
             INSERT INTO matching_history 
-            (student_id, supervisor_id, final_score, research_alignment, methodology_match, technical_skills, domain_knowledge, project_type_match, matching_skills)
+            (student_id, supervisor_id, final_score, research_alignment,technical_skills, domain_knowledge, project_type_match, matching_skills)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             student_id,
             supervisor_id,
             match_data['final_score'],
             match_data['detailed_scores']['research_alignment'],
-            match_data['detailed_scores']['methodology_match'],
             match_data['detailed_scores']['technical_skills'],
             match_data['detailed_scores']['domain_knowledge'],
             match_data['detailed_scores'].get('project_type_match', 0.0),
@@ -229,21 +227,18 @@ def init_session_state():
                 'title': '',
                 'description': '',
                 'technical_requirements': [],
-                'methodology': 'Quantitative',
                 'project_type': []
             },
             {
                 'title': '',
                 'description': '',
                 'technical_requirements': [],
-                'methodology': 'Quantitative',
                 'project_type': []
             },
             {
                 'title': '',
                 'description': '',
                 'technical_requirements': [],
-                'methodology': 'Quantitative',
                 'project_type': []
             }
         ]
@@ -451,14 +446,7 @@ def show_search_page():
                     key=f"tech_{index}"
                 )
             
-            methodology = st.selectbox(
-                'Primary Research Methodology',
-                ['Quantitative', 'Qualitative', 'Mixed Methods', 'Experimental'],
-                index=['Quantitative', 'Qualitative', 'Mixed Methods', 'Experimental'].index(
-                    st.session_state.project_data[index].get('methodology', 'Quantitative')
-                ),
-                key=f"method_{index}"
-            )
+
             
             submitted = st.form_submit_button("Find Matching Supervisors")
             if submitted:
@@ -469,7 +457,6 @@ def show_search_page():
                         'title': project_title,
                         'description': project_description,
                         'technical_requirements': selected_tech,
-                        'methodology': methodology,
                         'project_type': selected_project_type
                     }
                     
@@ -479,7 +466,6 @@ def show_search_page():
                         'project_description': (
                             f"{project_description}\n"
                             f"Technical requirements: {', '.join(selected_tech)}.\n"
-                            f"Research methodology: {methodology}."
                             f"Project type: {', '.join(selected_project_type)}."
                         ),
                         'project_type': selected_project_type
@@ -528,11 +514,10 @@ def show_search_page():
                     with col2:
                         st.write("**Match Scores:**")
                         scores_df = pd.DataFrame({
-                            'Metric': ['Research Alignment', 'Methodology Match', 
+                            'Metric': ['Research Alignment', 
                                      'Technical Skills', 'Domain Knowledge', 'Project Type Match'],
                             'Score': [
                                 match['detailed_scores']['research_alignment'],
-                                match['detailed_scores']['methodology_match'],
                                 match['detailed_scores']['technical_skills'],
                                 match['detailed_scores']['domain_knowledge'],
                                 match['detailed_scores'].get('project_type_match', 0.0)
@@ -677,7 +662,6 @@ def student_main():
                 margin-top: 0.5rem;
             ">
                 <li>Research interests alignment</li>
-                <li>Methodology compatibility</li>
                 <li>Technical skill requirements</li>
                 <li>Domain knowledge</li>
             </ul>
@@ -706,7 +690,6 @@ def student_main():
             ">
                 <li>Enter your project details</li>
                 <li>Specify technical requirements</li>
-                <li>Choose research methodology</li>
                 <li>Get matched with potential supervisors</li>
                 <li>Review detailed matching scores</li>
             </ol>
