@@ -190,7 +190,7 @@ class AdvancedSupervisorMatcher:
         return ' '.join(processed_tokens)
 
     def get_bert_embedding(self, text: str) -> np.ndarray:
-        """Get BERT embeddings with attention masking and pooling"""
+        
         text = self.preprocess_text(text)
         
         inputs = self.tokenizer(text, padding=True, truncation=True,
@@ -211,7 +211,7 @@ class AdvancedSupervisorMatcher:
         return pooled_embeddings.cpu().numpy()
 
     def get_sbert_embedding(self, text: str) -> np.ndarray:
-        """Get SBERT embeddings for text"""
+        
         text = self.preprocess_text(text)
         with torch.no_grad():
             embedding = self.sbert_model.encode(text, convert_to_numpy=True)
@@ -219,12 +219,12 @@ class AdvancedSupervisorMatcher:
 
     def calculate_research_alignment(self, student_desc: str, supervisor_interests: str) -> float:
         """Calculate semantic similarity using both BERT and SBERT"""
-        # Get BERT embeddings and similarity
+
         bert_student_emb = self.get_bert_embedding(student_desc)
         bert_supervisor_emb = self.get_bert_embedding(supervisor_interests)
         bert_similarity = float(cosine_similarity(bert_student_emb, bert_supervisor_emb)[0][0])
         
-        # Get SBERT embeddings and similarity
+        
         sbert_student_emb = self.get_sbert_embedding(student_desc)
         sbert_supervisor_emb = self.get_sbert_embedding(supervisor_interests)
         sbert_similarity = float(cosine_similarity(

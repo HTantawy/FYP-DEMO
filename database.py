@@ -439,13 +439,28 @@ def create_sample_students():
                 "password": "password123",
                 "full_name": "Mohamed Moustafa",
                 "course": "MSc Artificial Intelligence",
-                "year_of_study": 1,
+                "year_of_study": 2,
                 "projects": [
                     {
                         "title": "Generating Medical Reports from X-ray Images Using Large Language Models",
                         "description": "A project exploring the application of large language models to automatically generate preliminary medical reports from X-ray images. The system will combine computer vision techniques with NLP to create accurate, clinically relevant descriptions of medical images.",
                         "technical_requirements": ["Python", "PyTorch", "NLP", "Computer Vision", "Medical Imaging"],
                         "project_type": ["Research-Based", "Software Development"]
+                    }
+                ]
+            },
+                {
+                "email": "nour12@bham.ac.uk",
+                "password": "password123",
+                "full_name": "Nour Tantawy",
+                "course": "MSc Computer Science",
+                "year_of_study": 4,
+                "projects": [
+                    {
+                        "title": "Document Summarization Using NLP and Machine Learning",
+                        "description": "This project focuses on building an NLP pipeline for automatic document summarization using sequence-to-sequence models (e.g., T5 or Pegasus). The methodology involves preprocessing long text datasets, training abstractive summarization models, and evaluating results with metrics like ROUGE and METEOR.Expected outcomes include an NLP pipeline, summarized text outputs, and a web app for interactive summarization.",
+                        "technical_requirements": ["Python", "PyTorch", "NLP"],
+                        "project_type": ["Industry-focused", "Software Development"]
                     }
                 ]
             },
