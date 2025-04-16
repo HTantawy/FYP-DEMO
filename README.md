@@ -1,4 +1,4 @@
-# 📚 Intelligent Student-Supervisor Matcher Web-Application
+#  Intelligent Student-Supervisor Matcher Web-Application
 
 This is a web-based allocation system that uses NLP and semantic similarity techniques to match students with the most suitable supervisors based on project proposals, research interests, and technical compatibility. The system integrates BERT, SBERT, TF-IDF, and a custom scoring algorithm, all deployed through a user-friendly Streamlit interface.
 
