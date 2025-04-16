@@ -33,7 +33,7 @@ This is a web-based allocation system that uses NLP and semantic similarity tech
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/HTantawy/student-supervisor-matcher.git
+   git clone https://github.com/HTantawy/FYP-DEMO.git
    cd student-supervisor-matcher
    ```
 
